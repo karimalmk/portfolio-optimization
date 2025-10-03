@@ -1,2 +1,4 @@
-yfinance
-# Install all with pip3 install -r requirements.txt
+Flask
+Flask-Session
+pytz
+requests

@@ -22,6 +22,7 @@
     />
     <button type="submit">Create Strategy</button>
   </form>
+  <hr>
 
   <p></p>
   <p>Select an existing strategy:</p>
@@ -29,8 +30,16 @@
     {% for strategy in strategies %}
     <option value="{{ strategy.id }}">{{ strategy.name }}</option>
     {% endfor %}
-  </select>
+  </select>  
 
+  <p></p>
+  <!-- Display portfolio -->
   <div id="portfolio"></div>
+  <hr>
+
+  <!-- Edit strategies button -->
+  <button id="edit-strategy" type="button">Edit Strategies</button>
+  <p></p>
+  <div id="edit-list"></div>
 </main>
 {% endblock %}

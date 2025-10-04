@@ -2,9 +2,9 @@ from datetime import datetime
 from flask import Blueprint, request, session, redirect, abort, render_template
 from helpers import get_db, lookup
 
-transactions_bp = Blueprint('transactions', __name__)
+bp = Blueprint('transactions', __name__)
 
-@transactions_bp.route("/buy", methods=["GET", "POST"])
+@bp.route("/buy", methods=["GET", "POST"])
 def buy():
     db = get_db()
     if request.method == "GET":
@@ -65,7 +65,7 @@ def buy():
     return redirect("/")
 
 # Sell route
-@transactions_bp.route("/sell", methods=["GET", "POST"])
+@bp.route("/sell", methods=["GET", "POST"])
 def sell():
     db = get_db()
     if request.method == "GET":

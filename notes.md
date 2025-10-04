@@ -6,9 +6,11 @@
 
 ## Current problems:
 
-- Include option to delete strategies
 - Add latest price/quote + cash and net value to each portfolio display
-- Include placeholders for empty portfolios
-- Complete transactions index, incorporating state memory (session's strategy_id)
+- Complete transactions html page and api's
 - Add navigation between home, transactions, and backtesting space
 - Change the lookup API to a public alternative like yfinance
+
+## Learning opportunities:
+
+- Review completion of the event handlers for renaming and deletion (so-called "event delegation")

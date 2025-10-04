@@ -1,4 +1,6 @@
-/* Global layout */
+/* =========================================================
+   1. Base & Global Layout
+========================================================= */
 html, body {
   height: 100%;
   margin: 0;
@@ -9,7 +11,45 @@ html, body {
   color: #333;
 }
 
-/* Main content */
+/* =========================================================
+   2. Header & Navigation
+========================================================= */
+header {
+  background: #222;
+  color: #fff;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+nav a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+nav a:hover {
+  color: #ddd;
+}
+
+/* =========================================================
+   3. Main Content
+========================================================= */
 main {
   flex: 1;
   padding: 2rem;
@@ -17,7 +57,9 @@ main {
   margin: auto;
 }
 
-/* Footer */
+/* =========================================================
+   4. Footer
+========================================================= */
 footer {
   text-align: center;
   padding: 1rem;
@@ -27,20 +69,21 @@ footer {
   border-top: 1px solid #e0e0e0;
 }
 
-/* Table container for responsiveness */
+/* =========================================================
+   5. Tables
+========================================================= */
 .table-wrapper {
   overflow-x: auto;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* Table */
 table {
   width: 100%;
   border-collapse: collapse;
   border-radius: 8px;
   overflow: hidden;
-  background: white;
+  background: #fff;
 }
 
 th, td {
@@ -63,8 +106,10 @@ tr:nth-child(even) {
   background-color: #fdfdfd;
 }
 
-/* Buttons */
-/* Base button styling */
+/* =========================================================
+   6. Buttons
+========================================================= */
+/* Base button */
 button {
   display: inline-block;
   padding: 0.6rem 1.2rem;
@@ -78,7 +123,7 @@ button {
   color: #fff;
 }
 
-/* Hover + active effects */
+/* Hover & active states */
 button:hover {
   background-color: #444;
   transform: translateY(-1px);
@@ -90,7 +135,7 @@ button:active {
   box-shadow: none;
 }
 
-/* Secondary / outline button */
+/* Variants */
 button.outline {
   background: transparent;
   border: 2px solid #222;
@@ -102,7 +147,7 @@ button.outline:hover {
   color: #fff;
 }
 
-/* Disabled button */
+/* Disabled state */
 button:disabled {
   background: #ccc;
   color: #777;
@@ -110,7 +155,9 @@ button:disabled {
   box-shadow: none;
 }
 
-/* Input fields */
+/* =========================================================
+   7. Form Inputs
+========================================================= */
 input[type="text"],
 input[type="number"],
 input[type="email"],
@@ -130,7 +177,7 @@ textarea {
   box-sizing: border-box;
 }
 
-/* Focus state */
+/* Focus */
 input:focus,
 select:focus,
 textarea:focus {
@@ -139,7 +186,7 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(34, 34, 34, 0.15);
 }
 
-/* Disabled input */
+/* Disabled */
 input:disabled,
 textarea:disabled,
 select:disabled {
@@ -148,44 +195,8 @@ select:disabled {
   cursor: not-allowed;
 }
 
-/* Input with error state */
+/* Error */
 input.error {
   border-color: #d9534f;
   box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.2);
-}
-
-/* Header styling */
-header {
-  background: #222;
-  color: #fff;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-
-/* Logo / site title */
-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* Navigation */
-nav {
-  display: flex;
-  gap: 1.5rem;
-}
-
-nav a {
-  text-decoration: none;
-  color: #fff;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-nav a:hover {
-  color: #ddd;
 }

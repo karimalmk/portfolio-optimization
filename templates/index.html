@@ -1,17 +1,36 @@
-{% extends "layout.html" %} {% block title %} Home Page {% endblock %} {% block
-main %}
-<p>Create a new strategy:</p>
-<form id="create-strategy" method="POST" action="/api/create-strategy">
-  <input type="text" name="name" placeholder="Strategy Name" required />
-  <input type="text" name="cash" placeholder="Cash Amount" required />
-  <button type="submit">Create Strategy</button>
-  {% if strategies %}
+{% extends "layout.html" %} {% block title %} Home Page {% endblock %} {% block header %}
+<h1>Portfolio Optimization App</h1>
+<hr />
+{% endblock %}
+{% block main %}
+  <p>Create a new strategy:</p>
+  <form id="create-strategy" method="POST" action="/api/create-strategy">
+    <input
+      type="text"
+      autocomplete="off"
+      autofocus
+      name="name"
+      placeholder="Strategy Name"
+      required
+    />
+    <input
+      type="text"
+      autocomplete="off"
+      name="cash"
+      placeholder="Cash Amount"
+      required
+    />
+    <button type="submit">Create Strategy</button>
+  </form>
+
+  <p></p>
+  <p>Select an existing strategy:</p>
   <select id="select-strategy">
-    <p>Select an existing strategy:</p>
     {% for strategy in strategies %}
     <option value="{{ strategy.id }}">{{ strategy.name }}</option>
     {% endfor %}
   </select>
+
   <div id="portfolio"></div>
-  {% endif %} {% endblock %}
-</form>
+</main>
+{% endblock %}

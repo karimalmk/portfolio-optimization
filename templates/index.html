@@ -1,37 +1,17 @@
-{% extends "layout.html" %}
-
-{% block title %}
-    Home Page
-{% endblock %}
-
-{% block main %}
-    <h1>Portfolio Summary
-        <p> Cash Balance: {{ cash | usd }} </p>
-        <p> Grand Total: {{ grand_total | usd }} </p>
-    </h1>
-    <form action="/" method="POST">
-        <input type="text" name="strategy" placeholder="Strategy" required>
-        <input type="submit" value="Set Strategy">
-    </form>
-    <table>
-        <thead>
-            <h2>Your Portfolio</h2>
-            <tr>
-                <th>Symbol</th>
-                <th>Shares</th>
-                <th>Price</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for stock in portfolio %}
-            <tr>
-                <td>{{ stock.symbol }}</td>
-                <td>{{ stock.shares }}</td>
-                <td>{{ stock.price | usd }}</td>
-                <td>{{ stock.total | usd }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% endblock %}
+{% extends "layout.html" %} {% block title %} Home Page {% endblock %} {% block
+main %}
+<p>Create a new strategy:</p>
+<form id="create-strategy" method="POST" action="/api/create-strategy">
+  <input type="text" name="name" placeholder="Strategy Name" required />
+  <input type="text" name="cash" placeholder="Cash Amount" required />
+  <button type="submit">Create Strategy</button>
+  {% if strategies %}
+  <select id="select-strategy">
+    <p>Select an existing strategy:</p>
+    {% for strategy in strategies %}
+    <option value="{{ strategy.id }}">{{ strategy.name }}</option>
+    {% endfor %}
+  </select>
+  <div id="portfolio"></div>
+  {% endif %} {% endblock %}
+</form>

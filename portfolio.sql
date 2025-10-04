@@ -1,14 +1,14 @@
 CREATE TABLE IF NOT EXISTS strategy (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    budget NUMERIC NOT NULL
+    cash NUMERIC
 );
 
 CREATE TABLE IF NOT EXISTS portfolio (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     strategy TEXT NOT NULL,
-    symbol TEXT NOT NULL,
-    shares INTEGER NOT NULL,
+    symbol TEXT,
+    shares INTEGER,
     FOREIGN KEY (strategy) REFERENCES strategy(name),
     UNIQUE(strategy, symbol)
 );

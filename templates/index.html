@@ -5,10 +5,17 @@
 {% endblock %}
 
 {% block main %}
-    <p> Cash Balance: {{ cash | usd }} </p>
-    <p> Grand Total: {{ grand_total | usd }} </p>
+    <h1>Portfolio Summary
+        <p> Cash Balance: {{ cash | usd }} </p>
+        <p> Grand Total: {{ grand_total | usd }} </p>
+    </h1>
+    <form action="/" method="POST">
+        <input type="text" name="strategy" placeholder="Strategy" required>
+        <input type="submit" value="Set Strategy">
+    </form>
     <table>
         <thead>
+            <h2>Your Portfolio</h2>
             <tr>
                 <th>Symbol</th>
                 <th>Shares</th>

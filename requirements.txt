@@ -2,3 +2,9 @@ Flask
 Flask-Session
 pytz
 requests
+sqlite3
+
+black
+python-dotenv
+prettier
+sql-formatter

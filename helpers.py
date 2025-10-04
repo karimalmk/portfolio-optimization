@@ -1,50 +1,11 @@
 import requests
+import sqlite3
 
-from flask import redirect, render_template, session
-from functools import wraps
+db = sqlite3.connect("portfolio.db", check_same_thread=False)
 
+###### TO DO: ADD A BACKTESTING PAGE #####
 
-def apology(message, code=400):
-    """Render message as an apology to user."""
-
-    def escape(s):
-        """
-        Escape special characters.
-
-        https://github.com/jacebrowning/memegen#special-characters
-        """
-        for old, new in [
-            ("-", "--"),
-            (" ", "-"),
-            ("_", "__"),
-            ("?", "~q"),
-            ("%", "~p"),
-            ("#", "~h"),
-            ("/", "~s"),
-            ('"', "''"),
-        ]:
-            s = s.replace(old, new)
-        return s
-
-    return render_template("apology.html", top=code, bottom=escape(message)), code
-
-
-def login_required(f):
-    """
-    Decorate routes to require login.
-
-    https://flask.palletsprojects.com/en/latest/patterns/viewdecorators/
-    """
-
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get("user_id") is None:
-            return redirect("/login")
-        return f(*args, **kwargs)
-
-    return decorated_function
-
-
+############ Defining stock quote lookup function #############
 def lookup(symbol):
     """Look up quote for symbol."""
     url = f"https://finance.cs50.io/quote?symbol={symbol.upper()}"
@@ -63,7 +24,15 @@ def lookup(symbol):
         print(f"Data parsing error: {e}")
     return None
 
-
+############# Defining currency formatting functions #############
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"
+
+def gbp(value):
+    """Format value as GBP."""
+    return f"£{value:,.2f}"
+
+def eur(value):
+    """Format value as EUR."""
+    return f"€{value:,.2f}"

@@ -1,10 +1,9 @@
-## Progress Tracker
-# Future steps:
+## Future steps:
 
 - Add backtesting html
 - Add portfolio performance metrics / summary statistics on the index.html page
 
-# Current problems:
+## Current problems:
 
 - Include option to delete strategies
 - Include placeholders for empty portfolios

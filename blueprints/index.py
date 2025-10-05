@@ -5,7 +5,7 @@ from helpers import get_db
 bp = Blueprint("index", __name__)
 
 # =====================================================
-# CREATE STRATEGY
+# Creating strategy
 # =====================================================
 @bp.route("/api/create-strategy", methods=["POST"])
 def create_strategy():
@@ -24,7 +24,7 @@ def create_strategy():
         return abort(400, description="Cash must be numeric")
 
     try:
-        db.execute("INSERT INTO strategy (name, cash) VALUES (?, ?)", (name, cash))
+        db.execute("""INSERT INTO strategy (name, cash) VALUES (?, ?)""", (name, cash))
     except IntegrityError:
         db.close()
         return abort(400, description="Strategy name must be unique")
@@ -36,58 +36,32 @@ def create_strategy():
 
 
 # =====================================================
-# CHECK IF STRATEGY LIST EXISTS
-# =====================================================
-@bp.route("/api/strategy-list-exists/", methods=["GET"])
-def strategy_list_exists():
-    db = get_db()
-    strategy = db.execute("SELECT id FROM strategy LIMIT 1").fetchone()
-    db.close()
-    return jsonify({"exists": bool(strategy)})
-
-
-# =====================================================
-# GET STRATEGIES (for dropdown)
+# Strategies list
 # =====================================================
 @bp.route("/api/strategies", methods=["GET"])
 def get_strategies():
     db = get_db()
-    rows = db.execute("SELECT id, name FROM strategy ORDER BY id ASC").fetchall()
+    rows = db.execute("SELECT id, name, cash FROM strategy ORDER BY id ASC").fetchall()
+    strategies = [{"id": row["id"], "name": row["name"], "cash": row["cash"]} for row in rows]
+    strategy_exists = db.execute("SELECT id FROM strategy LIMIT 1").fetchone()
     db.close()
-    strategies = [{"id": row["id"], "name": row["name"]} for row in rows]
-    return jsonify({"strategies": strategies})
+    return jsonify({"strategies": strategies, "exists": bool(strategy_exists)})
 
 
 # =====================================================
-# EDIT STRATEGIES (for rename/delete view)
+# Portfolio information
 # =====================================================
-@bp.route("/api/edit-strategy", methods=["GET"])
-def edit_strategy():
+@bp.route("/api/portfolio/<int:id>", methods=["GET"])
+def display_portfolio(id):
     db = get_db()
-    rows = db.execute("SELECT id, name FROM strategy ORDER BY id ASC").fetchall()
-    db.close()
-    strategies = [{"id": row["id"], "name": row["name"]} for row in rows]
-    return jsonify({"strategies": strategies})
-
-
-# =====================================================
-# LOAD PORTFOLIO FOR SELECTED STRATEGY
-# =====================================================
-@bp.route("/api/load-portfolio/<int:strategy_id>", methods=["GET"])
-def load_portfolio(strategy_id):
-    db = get_db()
-    rows = db.execute(
-        "SELECT symbol, shares FROM portfolio WHERE strategy = ?",
-        (strategy_id,),
-    ).fetchall()
-    db.close()
-
+    rows = db.execute("SELECT symbol, shares FROM portfolio WHERE strategy_id = ?", (id,)).fetchall()
     portfolio = [{"symbol": row["symbol"], "shares": row["shares"]} for row in rows]
-    return jsonify({"portfolio": portfolio})
+    db.close()
+    return jsonify(portfolio)
 
 
 # =====================================================
-# RENAME STRATEGY
+# Renaming strategy
 # =====================================================
 @bp.route("/api/rename-strategy/<int:strategy_id>", methods=["PUT"])
 def rename_strategy(strategy_id):
@@ -112,7 +86,7 @@ def rename_strategy(strategy_id):
 
 
 # =====================================================
-# DELETE STRATEGY
+# Deleting strategy
 # =====================================================
 @bp.route("/api/delete-strategy/<int:strategy_id>", methods=["DELETE"])
 def delete_strategy(strategy_id):

@@ -3,8 +3,8 @@ from flask import Flask, render_template
 from helpers import register_error_handlers, get_db, usd, gbp, eur
 
 # Importing blueprints
-from routes.transactions import bp as transactions_bp
-from index import bp as api_bp
+from blueprints.transactions import bp as transactions_bp
+from blueprints.index import bp as api_bp
 
 # Application set-up
 app = Flask(__name__)
@@ -36,10 +36,9 @@ def index():
     db = get_db()
     rows = db.execute("SELECT id, name FROM strategy").fetchall()
     strategies = [{"id": row["id"], "name": row["name"]} for row in rows]
-    print("Returning strategies:", strategies)
     return render_template("index.html", strategies=strategies)
 
-
+# Transactions route
 @app.route("/transactions")
 def transactions():
     return render_template("transactions.html")

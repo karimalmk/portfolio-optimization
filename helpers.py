@@ -3,7 +3,9 @@ import sqlite3
 from flask import render_template
 from werkzeug.exceptions import HTTPException
 
-############ Defining error handlers #############
+## ============================
+## Defining error handlers
+## ============================
 def register_error_handlers(app):
 
     @app.errorhandler(400)
@@ -25,14 +27,18 @@ def register_error_handlers(app):
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):
         return render_template("error.html", message=e.description), e.code
-    
-############ Defining database connection function #############
+
+## ========================================
+## Defining database connection function
+## ========================================
 def get_db():
     db = sqlite3.connect("portfolio.db")
     db.row_factory = sqlite3.Row
     return db
 
-############ TO DO: update lookup function to use public API #############
+## =======================================
+## Defining stock quote lookup function
+## =======================================
 def lookup(symbol):
     """Look up quote for symbol."""
     url = f"https://finance.cs50.io/quote?symbol={symbol.upper()}"
@@ -51,7 +57,9 @@ def lookup(symbol):
         print(f"Data parsing error: {e}")
     return None
 
-############# Defining currency formatting functions #############
+## ========================================
+## Defining currency formatting functions
+## ========================================
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"

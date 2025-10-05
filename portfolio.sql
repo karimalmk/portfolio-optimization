@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS strategy (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    cash NUMERIC
+    cash NUMERIC,
+    total_value NUMERIC GENERATED ALWAYS AS (cash) VIRTUAL
 );
 
 CREATE TABLE IF NOT EXISTS portfolio (
@@ -9,8 +10,6 @@ CREATE TABLE IF NOT EXISTS portfolio (
     strategy_id INTEGER NOT NULL,
     symbol TEXT,
     shares INTEGER,
-    cash NUMERIC,
-    total_value NUMERIC DEFAULT cash,
     UNIQUE(strategy_id, symbol),
     FOREIGN KEY (strategy_id) REFERENCES strategy(id)
 );

@@ -28,7 +28,6 @@ app.jinja_env.filters["eur"] = eur
 
 # Register blueprints
 app.register_blueprint(transactions_bp)
-app.register_blueprint(backtest_bp)
 app.register_blueprint(api_bp)
 
 # Root route

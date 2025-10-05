@@ -1,23 +1,26 @@
 {% extends "layout.html" %} {% block title %} Buy {% endblock %} {% block header
 %} {% endblock %} {% block main %}
-<form action="/transactions" method="post">
-  <input type="radio" name="action" value="buy">
-  <label for="buy">Buy</label>
-  <input type="radio" name="action" value="sell">
-  <label for="sell">Sell</label>
-  <input
-    autocomplete="off"
-    name="symbol"
-    type="text"
-    placeholder="Stock ticker"
-  />
-  <input
-    autocomplete="off"
-    name="shares"
-    type="number"
-    min="1"
-    placeholder="Number of shares"
-  />
-  <button type="submit">Submit</button>
+<select id="select-strategy">
+  <option value="" disabled selected>— Select strategy —</option>
+  {% for strategy in strategies %}
+  <option value="{{ strategy.id }}">{{ strategy.name }}</option>
+  {% endfor %}
+</select>
+
+<form class="radio-group">
+  <label>
+    <input type="radio" name="action" value="deposit" data-action="deposit" />
+    Deposit
+  </label>
+  <label>
+    <input type="radio" name="action" value="buy" data-action="buy" />
+    Buy
+  </label>
+  <label>
+    <input type="radio" name="action" value="sell" data-action="sell" />
+    Sell
+  </label>
 </form>
+
+<div id="input-placeholder"></div>
 {% endblock %}

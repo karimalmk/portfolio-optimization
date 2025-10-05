@@ -195,7 +195,7 @@ async function load_portfolio(strategy_id) {
     const thead = document.createElement("thead");
     thead.innerHTML = `
       <tr>
-        <th>Symbol</th>
+        <th>Ticker</th>
         <th>Shares</th>
       </tr>
     `;
@@ -216,7 +216,7 @@ async function load_portfolio(strategy_id) {
       portfolio.forEach((stock) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${stock.symbol}</td>
+          <td>${stock.ticker}</td>
           <td>${stock.shares}</td>
         `;
         tbody.appendChild(row);
@@ -261,7 +261,7 @@ async function load_strategies_dropdown() {
   // Add a default empty option first
   const defaultOption = document.createElement("option");
   defaultOption.value = "";
-  defaultOption.textContent = "— Select a strategy —";
+  defaultOption.textContent = "— Select strategy —";
   defaultOption.disabled = true;
   defaultOption.selected = true;
   select.appendChild(defaultOption);

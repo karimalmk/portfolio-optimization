@@ -39,9 +39,9 @@ def get_db():
 ## =======================================
 ## Defining stock quote lookup function
 ## =======================================
-def lookup(symbol):
-    """Look up quote for symbol."""
-    url = f"https://finance.cs50.io/quote?symbol={symbol.upper()}"
+def lookup(ticker):
+    """Look up quote for ticker."""
+    url = f"https://finance.cs50.io/quote?ticker={ticker.upper()}"
     try:
         response = requests.get(url)
         response.raise_for_status()  # Raise an error for HTTP error responses
@@ -49,7 +49,7 @@ def lookup(symbol):
         return {
             "name": quote_data["companyName"],
             "price": quote_data["latestPrice"],
-            "symbol": symbol.upper()
+            "ticker": ticker.upper()
         }
     except requests.RequestException as e:
         print(f"Request error: {e}")

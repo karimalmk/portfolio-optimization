@@ -36,12 +36,17 @@ def index():
     db = get_db()
     rows = db.execute("SELECT id, name FROM strategy").fetchall()
     strategies = [{"id": row["id"], "name": row["name"]} for row in rows]
+    db.close()
     return render_template("index.html", strategies=strategies)
 
 # Transactions route
 @app.route("/transactions")
 def transactions():
-    return render_template("transactions.html")
+    db = get_db()
+    rows = db.execute("SELECT id, name FROM strategy").fetchall()
+    strategies = [{"id": row["id"], "name": row["name"]} for row in rows]
+    db.close()
+    return render_template("transactions.html", strategies=strategies)
 
 # Run the application
 if __name__ == "__main__":

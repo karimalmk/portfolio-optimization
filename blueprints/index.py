@@ -54,8 +54,8 @@ def get_strategies():
 @bp.route("/api/portfolio/<int:id>", methods=["GET"])
 def display_portfolio(id):
     db = get_db()
-    rows = db.execute("SELECT symbol, shares FROM portfolio WHERE strategy_id = ?", (id,)).fetchall()
-    portfolio = [{"symbol": row["symbol"], "shares": row["shares"]} for row in rows]
+    rows = db.execute("SELECT ticker, shares FROM portfolio WHERE strategy_id = ?", (id,)).fetchall()
+    portfolio = [{"ticker": row["ticker"], "shares": row["shares"]} for row in rows]
     db.close()
     return jsonify(portfolio)
 

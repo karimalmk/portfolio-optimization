@@ -1,29 +1,15 @@
 {% extends "layout.html" %} {% block title %} Buy {% endblock %} {% block header
 %} {% endblock %} {% block main %}
-<form action="/buy" method="post">
+<form action="/transactions" method="post">
+  <input type="radio" name="action" value="buy">
+  <label for="buy">Buy</label>
+  <input type="radio" name="action" value="sell">
+  <label for="sell">Sell</label>
   <input
     autocomplete="off"
-    autofocus
     name="symbol"
     type="text"
     placeholder="Stock ticker"
-  />
-  <input
-    autocomplete="off"
-    name="shares"
-    type="number"
-    min="1"
-    placeholder="Number of shares"
-  />
-  <button type="submit">Submit</button>
-</form>
-<form action="/sell" method="post">
-  <input
-    autocomplete="off"
-    autofocus
-    name="symbol"
-    type="text"
-    placeholder="Stock symbol"
   />
   <input
     autocomplete="off"

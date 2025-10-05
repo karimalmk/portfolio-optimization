@@ -13,12 +13,21 @@
     />
     <!-- Custom CSS -->
     <link href="/static/styles.css" rel="stylesheet" />
-    <script src="/static/script.js" defer></script>
+    <script src="/static/index.js" defer></script>
+    <script src="/static/transactions.js" defer></script>
 
     <title>{% block title %} {% endblock %}</title>
   </head>
   <body>
-    <header>{% block header %} {% endblock %}</header>
+    <header>
+      <h1>Portfolio Optimization App</h1>
+      <hr />
+      <nav>
+        <a href="/">Home</a>
+        <a href="/transactions">Transactions</a>
+      </nav>
+      {% block header %} {% endblock %}
+    </header>
     <main>{% block main %} {% endblock %}</main>
     <footer>Portfolio Optimization App &copy; 2024</footer>
   </body>

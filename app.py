@@ -5,7 +5,7 @@ from helpers import register_error_handlers, get_db, usd, gbp, eur
 # Importing blueprints
 from routes.transactions import bp as transactions_bp
 from routes.backtest import bp as backtest_bp
-from api import bp as api_bp
+from index import bp as api_bp
 
 # Application set-up
 app = Flask(__name__)
@@ -41,5 +41,11 @@ def index():
     print("Returning strategies:", strategies)
     return render_template("index.html", strategies=strategies)
 
+
+@app.route("/transactions")
+def transactions():
+    return render_template("transactions.html")
+
+# Run the application
 if __name__ == "__main__":
     app.run(debug=True)

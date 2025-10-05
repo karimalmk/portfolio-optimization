@@ -6,29 +6,22 @@ CREATE TABLE IF NOT EXISTS strategy (
 
 CREATE TABLE IF NOT EXISTS portfolio (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    strategy TEXT NOT NULL,
+    strategy_id INTEGER NOT NULL,
     symbol TEXT,
     shares INTEGER,
-    FOREIGN KEY (strategy) REFERENCES strategy(name),
-    UNIQUE(strategy, symbol)
+    cash NUMERIC,
+    total_value NUMERIC DEFAULT cash,
+    UNIQUE(strategy_id, symbol),
+    FOREIGN KEY (strategy_id) REFERENCES strategy(id)
 );
 
-CREATE TABLE IF NOT EXISTS buy (
+CREATE TABLE IF NOT EXISTS transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    strategy TEXT NOT NULL,
+    strategy_id INTEGER NOT NULL,
     symbol TEXT,
+    type TEXT CHECK(type IN ('buy', 'sell')),
     price NUMERIC,
     shares NUMERIC,
-    buy_date DATE,
-    FOREIGN KEY (strategy) REFERENCES strategy(name)
-);
-
-CREATE TABLE IF NOT EXISTS sell (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    strategy TEXT NOT NULL,
-    symbol TEXT,
-    price NUMERIC,
-    shares NUMERIC,
-    sell_date DATE,
-    FOREIGN KEY (strategy) REFERENCES strategy(name)
+    transaction_date DATE,
+    FOREIGN KEY (strategy_id) REFERENCES strategy(id)
 );

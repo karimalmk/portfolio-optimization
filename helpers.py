@@ -40,6 +40,11 @@ def get_db():
 ## Defining stock quote lookup function
 ## =======================================
 def lookup(ticker):
+    
+    price = 50.00  # Mock price for testing
+    return {"name": "Mock Company", "ticker": ticker.upper(), "price": price}
+
+    '''
     """Look up quote for ticker."""
     url = f"https://finance.cs50.io/quote?ticker={ticker.upper()}"
     try:
@@ -56,6 +61,7 @@ def lookup(ticker):
     except (KeyError, ValueError) as e:
         print(f"Data parsing error: {e}")
     return None
+    '''
 
 ## ========================================
 ## Defining currency formatting functions

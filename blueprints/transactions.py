@@ -1,93 +1,75 @@
-from crypt import methods
 from datetime import datetime
-from email.quoprimime import quote
-from flask import Blueprint, request, session, redirect, abort, render_template
+from flask import Blueprint, request, session, abort, jsonify
 from helpers import get_db, lookup
 
 bp = Blueprint('transactions', __name__)
 
-@bp.route("/transactions/api/strategy", methods=["GET"])
+# ===============================
+# Strategy Selection
+# ===============================
+@bp.route("/transactions/api/strategy", methods=["POST"])
 def get_strategy():
-    strategy = request.args.get("strategy")
+    strategy_id = request.form.get("strategy_id")
     db = get_db()
-    strategy_id = db.execute("SELECT id FROM strategy WHERE name = ?", (strategy,)).fetchone()[0]
-    cash = db.execute("SELECT cash FROM strategy WHERE name = ?", (strategy,)).fetchone()[0]
-    
-    session["strategy"] = strategy
+    cash = db.execute("SELECT cash FROM strategy WHERE id = ?", (strategy_id,)).fetchone()[0]
     session["strategy_id"] = strategy_id
     session["cash"] = cash
-    
     db.close()
-    return {"status": "success"}
+    return jsonify({"status": "success"})
 
-@bp.route("/transactions/api/deposit", methods=["GET"])
+
+# ===============================
+# Deposit Funds
+# ===============================
+@bp.route("/transactions/api/deposit", methods=["POST"])
 def deposit():
-    strategy = session.get("strategy")
-    deposit = request.args.get("deposit")
-    
-    db = get_db()
-    if deposit:
-        old_amount = db.execute("SELECT cash FROM strategy WHERE name = ?", (strategy,)).fetchone()[0]
-        db.execute("UPDATE strategy SET cash = ? WHERE name = ?", (old_amount + deposit, strategy))
-        db.commit()
-    return {"status": "success"}
-
-
-@bp.route("/transactions/api/buy", methods=["GET"])
-def buy():
-
-    ticker = request.form.get("ticker")
-    shares = request.form.get("shares")
-    strategy = session.get("strategy")
     strategy_id = session.get("strategy_id")
-    cash = session.get("cash")
+    data = request.get_json()
+    amount = data.get("amount")
 
-    if not ticker or not shares:
-        return abort(400)
+    if not strategy_id or amount is None:
+        return abort(400, "Missing data")
 
     try:
-        shares = int(shares)
-        if shares <= 0:
-            return abort(400)
+        amount = float(amount)
+        if amount <= 0:
+            return abort(400, "Invalid amount")
     except ValueError:
-        return abort(400)
+        return abort(400, "Invalid number")
 
-    quote = lookup(ticker)
-    if not quote:
-        return abort(502)
-    
     db = get_db()
-    price = quote["price"]
-    cost = price * shares
-    
-    if cost > cash:
-        db.close()
-        return abort(400)
-    
-    strategy_id = session.get("strategy_id")
-    buy_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_cash = db.execute("SELECT cash FROM strategy WHERE id = ?", (strategy_id,)).fetchone()[0]
+    new_cash = current_cash + amount
 
-    db.execute("INSERT INTO transactions (type, ticker, shares, strategy, strategy_id, date) VALUES (?, ?, ?, ?, ?, ?)",
-               ("buy", ticker, shares, strategy, strategy_id, buy_date))
-    db.execute("UPDATE strategy SET cash = ? WHERE name = ?", (cash - cost, strategy))
+    db.execute("UPDATE strategy SET cash = ? WHERE id = ?", (new_cash, strategy_id))
+    db.execute(
+        "INSERT INTO transactions (strategy_id, type, ticker, shares, price, date) VALUES (?, ?, ?, ?, ?, ?)",
+        (strategy_id, "deposit", None, None, None, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+
     db.commit()
     db.close()
-    return redirect("/transactions")
+    session["cash"] = new_cash
+    return jsonify({"status": "success"})
 
-@bp.route("/transactions/api/sell", methods=["GET"])
-def sell():
 
-    ticker = request.form.get("ticker")
-    shares = request.form.get("shares")
-    strategy = session.get("strategy")
+# ===============================
+# Buy Stocks
+# ===============================
+@bp.route("/transactions/api/buy", methods=["POST"])
+def buy():
     strategy_id = session.get("strategy_id")
     cash = session.get("cash")
+    data = request.get_json()
 
-    if not ticker or not shares:
-        return abort(400)
+    ticker = data.get("ticker")
+    shares = data.get("shares")
+
+    if not ticker or shares is None:
+        return abort(400, "Missing data")
 
     try:
-        shares = int(shares)
+        shares = float(shares)
         if shares <= 0:
             return abort(400)
     except ValueError:
@@ -97,26 +79,101 @@ def sell():
     if not quote:
         return abort(502)
 
-    price = quote["price"]
-    if not price:
-        return abort(502)
-     
+    price = float(quote["price"])
+    cost = price * shares
+
+    if cost > cash:
+        return abort(400, "Insufficient cash")
+
     db = get_db()
-    existing_shares = db.execute("SELECT shares FROM portfolio WHERE symbol = ? AND strategy = ?", (ticker, strategy)).fetchone()[0]
-    
+
+    # Update portfolio
+    row = db.execute(
+        "SELECT shares FROM portfolio WHERE strategy_id = ? AND ticker = ?", (strategy_id, ticker)
+    ).fetchone()
+    if row:
+        db.execute(
+            "UPDATE portfolio SET shares = shares + ? WHERE strategy_id = ? AND ticker = ?",
+            (shares, strategy_id, ticker),
+        )
+    else:
+        db.execute(
+            "INSERT INTO portfolio (strategy_id, ticker, shares) VALUES (?, ?, ?)",
+            (strategy_id, ticker, shares),
+        )
+
+    # Record transaction & update cash
+    db.execute(
+        "INSERT INTO transactions (strategy_id, type, ticker, shares, price, date) VALUES (?, ?, ?, ?, ?, ?)",
+        (strategy_id, "buy", ticker, shares, price, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    db.execute("UPDATE strategy SET cash = ? WHERE id = ?", (cash - cost, strategy_id))
+
+    db.commit()
+    db.close()
+    session["cash"] = cash - cost
+    return jsonify({"status": "success"})
+
+
+# ===============================
+# Sell Stocks
+# ===============================
+@bp.route("/transactions/api/sell", methods=["POST"])
+def sell():
+    strategy_id = session.get("strategy_id")
+    cash = session.get("cash")
+    data = request.get_json()
+
+    ticker = data.get("ticker")
+    shares = data.get("shares")
+
+    if not ticker or shares is None:
+        return abort(400, "Missing data")
+
+    try:
+        shares = float(shares)
+        if shares <= 0:
+            return abort(400)
+    except ValueError:
+        return abort(400)
+
+    quote = lookup(ticker)
+    if not quote:
+        return abort(502)
+
+    db = get_db()
+    row = db.execute(
+        "SELECT shares FROM portfolio WHERE strategy_id = ? AND ticker = ?", (strategy_id, ticker)
+    ).fetchone()
+    existing_shares = row[0] if row else 0
+
     if existing_shares < shares:
         db.close()
-        return abort(400)
-    
+        return abort(400, "Not enough shares")
+
+    price = float(quote["price"])
     revenue = price * shares
-    db = get_db()
-    strategy_id = session.get("strategy_id")
-    sell_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # Update portfolio
+    db.execute(
+        "UPDATE portfolio SET shares = shares - ? WHERE strategy_id = ? AND ticker = ?",
+        (shares, strategy_id, ticker),
+    )
 
-    db.execute("INSERT INTO transactions (type, ticker, shares, strategy, strategy_id, date) VALUES (?, ?, ?, ?, ?, ?)",
-               ("sell", ticker, shares, strategy, strategy_id, sell_date))
-    db.execute("UPDATE strategy SET cash = ? WHERE name = ?", (cash + revenue, strategy))
+    # Remove entry if shares drop to zero or below
+    db.execute(
+        "DELETE FROM portfolio WHERE strategy_id = ? AND ticker = ? AND shares <= 0",
+        (strategy_id, ticker),
+    )
+
+    # Record transaction & update cash
+    db.execute(
+        "INSERT INTO transactions (strategy_id, type, ticker, shares, price, date) VALUES (?, ?, ?, ?, ?, ?)",
+        (strategy_id, "sell", ticker, shares, price, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    db.execute("UPDATE strategy SET cash = ? WHERE id = ?", (cash + revenue, strategy_id))
+
     db.commit()
     db.close()
-    return redirect("/transactions")
+    session["cash"] = cash + revenue
+    return jsonify({"status": "success"})

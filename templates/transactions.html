@@ -1,25 +1,30 @@
-{% extends "layout.html" %} {% block title %} Buy {% endblock %} {% block header
-%} {% endblock %} {% block main %}
-<select id="select-strategy">
-  <option value="" disabled selected>— Select strategy —</option>
-  {% for strategy in strategies %}
-  <option value="{{ strategy.id }}">{{ strategy.name }}</option>
-  {% endfor %}
-</select>
+{% extends "layout.html" %} {% block title %}Buy{% endblock %} {% block header
+%}{% endblock %} {% block main %}
 
-<form class="radio-group">
-  <label>
-    <input type="radio" name="action" value="deposit" data-action="deposit" />
-    Deposit
-  </label>
-  <label>
-    <input type="radio" name="action" value="buy" data-action="buy" />
-    Buy
-  </label>
-  <label>
-    <input type="radio" name="action" value="sell" data-action="sell" />
-    Sell
-  </label>
+<form action="/transactions/api/strategy" method="POST">
+  <!-- Strategy selector -->
+  <select name="strategy_id" id="transactions-strategy" required>
+    <option disabled selected>— Select strategy —</option>
+    {% for strategy in strategies %}
+    <option value="{{ strategy.id }}">{{ strategy.name }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Action radio group -->
+  <div class="radio-group">
+    <label>
+      <input type="radio" data-action="deposit" name="action" value="deposit" required />
+      Deposit
+    </label>
+    <label>
+      <input type="radio" data-action="buy" name="action" value="buy" />
+      Buy
+    </label>
+    <label>
+      <input type="radio" data-action="sell" name="action" value="sell" />
+      Sell
+    </label>
+  </div>
 </form>
 
 <div id="input-placeholder"></div>

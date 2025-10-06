@@ -16,18 +16,10 @@ CREATE TABLE IF NOT EXISTS portfolio (
 CREATE TABLE IF NOT EXISTS transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     strategy_id INTEGER NOT NULL,
+    type TEXT CHECK(type IN ('buy', 'sell', 'deposit')),
     ticker TEXT,
-    type TEXT CHECK(type IN ('buy', 'sell')),
-    price NUMERIC,
     shares NUMERIC,
-    date DATE,
-    FOREIGN KEY (strategy_id) REFERENCES strategy(id)
-);
-
-CREATE TABLE IF NOT EXISTS account (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    strategy_id INTEGER NOT NULL,
-    date DATE,
-    cash_flow NUMERIC,
+    price NUMERIC,
+    date DATE NOT NULL,
     FOREIGN KEY (strategy_id) REFERENCES strategy(id)
 );

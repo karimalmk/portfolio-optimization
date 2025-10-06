@@ -49,7 +49,7 @@ async function display_strategies() {
       <select id="select-strategy"></select>
       <p></p>
       <table id="portfolio"></table>
-      <hr>
+      <p></p>
       <button id="edit-strategy" type="button">Edit</button>
       <p></p>
       <div id="edit-list"></div>
@@ -69,7 +69,7 @@ document.addEventListener("change", (event) => {
 });
 
 document.addEventListener("click", async (event) => {
-  // Edit mode
+  // ======Edit mode =======
   if (event.target.id === "edit-strategy") {
     const response = await fetch("/api/strategies");
     if (!response.ok) return alert("Failed to load strategies");
@@ -96,7 +96,7 @@ document.addEventListener("click", async (event) => {
     container.innerHTML += `<p></p><button id="done">Done</button>`;
   }
 
-  // Rename
+  // ============ Rename ===========
   if (event.target.classList.contains("rename-strategy")) {
     const id = event.target.dataset.id;
     const nameCell = document.getElementById(`name-${id}`);
@@ -104,9 +104,11 @@ document.addEventListener("click", async (event) => {
       <input type="text" id="new-name-${id}" placeholder="New name" />
       <button id="confirm-rename-${id}">Confirm</button>
     `;
+    document.getElementById(`new-name-${id}`).setAttribute("autocomplete", "off");
+    document.getElementById(`new-name-${id}`).focus();
   }
 
-  // Confirm rename
+  // =========== Confirm rename ===========
   if (event.target.id.startsWith("confirm-rename-")) {
     const id = event.target.id.replace("confirm-rename-", "");
     const newName = document.getElementById(`new-name-${id}`).value.trim();
@@ -125,7 +127,7 @@ document.addEventListener("click", async (event) => {
     }
   }
 
-  // Delete
+  // =========== Delete ===========
   if (event.target.classList.contains("delete-strategy")) {
     const id = event.target.dataset.id;
     const response = await fetch(`/api/delete-strategy/${id}`, {
@@ -145,7 +147,7 @@ document.addEventListener("click", async (event) => {
     }
   }
 
-  // Done
+  // =========== Done ===========
   if (event.target.id === "done") {
     document.getElementById("edit-list").innerHTML = "";
     const stillExists = await check_strategies_exists();

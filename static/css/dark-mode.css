@@ -1,0 +1,72 @@
+/* =========================
+Main styles
+========================== */
+html,
+body {
+  height: 100%;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  font-family: "Times New Roman", Times, serif;
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+main {
+  flex: 1;
+}
+
+footer {
+  height: 30px;
+  color: #e0e0e0;
+}
+
+table {
+  width: 50%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+th,
+td {
+  padding: 12px 15px;
+  border: 1px solid #444;
+}
+
+th {
+  background-color: #333;
+  color: #e0e0e0;
+}
+
+tr:nth-child(even) {
+  background-color: #1e1e1e;
+}
+
+/* =========================
+Components styles 
+========================== */
+input {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #333;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+button {
+  background-color: #333;
+  color: #e0e0e0;
+  border: none;
+  border: 1px solid #444;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+select {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #333;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}

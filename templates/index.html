@@ -1,6 +1,5 @@
 {% extends "layout.html" %} {% block title %} Home Page {% endblock %} {% block
-main %}
-<p>Create a new strategy:</p>
+main %} Create a new strategy:
 
 <form id="create-strategy" method="POST" action="/api/create-strategy">
   <input
@@ -20,8 +19,6 @@ main %}
   />
   <button type="submit">Create Strategy</button>
 </form>
-
-<p></p>
 
 <div id="content-placeholder"></div>
 {% endblock %}

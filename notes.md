@@ -5,10 +5,7 @@
 
 
 ## Current problems:
-- Add cash and net value to portfolio display
-- Transactions HTML and API
-    - Change the lookup API to a public alternative like yfinance
-    - Add latest price/quote + general API functionality to transactions html and api
+- Whenever you rename and reload the strategies drop-down, you must auto-select the portfolio which was previously selected!
 
 
 ## Learning opportunities:

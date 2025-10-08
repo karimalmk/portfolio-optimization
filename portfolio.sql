@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS strategy (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    cash REAL DEFAULT 0,
+    starting_cash REAL DEFAULT 0,
+    current_cash REAL DEFAULT 0,
     total_value REAL DEFAULT 0
 );
 

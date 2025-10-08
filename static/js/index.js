@@ -11,10 +11,32 @@ document
       method: "POST",
       body: formData,
     });
-    const newStrategy = await response.json();
-    await append_strategy(newStrategy);
-    this.reset();
+    const data = await response.json();
+    await append_strategy(data);
+    if (data.status == "success") {
+      alert(`Strategy "${data.name}" created with initial cash ${data.cash}`);
+      this.reset();
+    }
   });
+
+async function append_strategy(newStrategy) {
+  if (!newStrategy) return;
+  let select = document.getElementById("select-strategy");
+
+  if (!document.getElementById("strategy-content")) {
+    await display_strategies();
+    select = document.getElementById("select-strategy");
+  }
+
+  if (select) {
+    const option = document.createElement("option");
+    option.value = newStrategy.id;
+    option.text = newStrategy.name;
+    select.add(option);
+    select.value = newStrategy.id;
+    await load_portfolio(newStrategy.id);
+  }
+}
 
 // ======================================================
 // Display strategies
@@ -145,28 +167,6 @@ document.addEventListener("click", async (event) => {
 });
 
 // ======================================================
-// Append strategy
-// ======================================================
-async function append_strategy(newStrategy) {
-  if (!newStrategy) return;
-  let select = document.getElementById("select-strategy");
-
-  if (!document.getElementById("strategy-content")) {
-    await display_strategies();
-    select = document.getElementById("select-strategy");
-  }
-
-  if (select) {
-    const option = document.createElement("option");
-    option.value = newStrategy.id;
-    option.text = newStrategy.name;
-    select.add(option);
-    select.value = newStrategy.id;
-    await load_portfolio(newStrategy.id);
-  }
-}
-
-// ======================================================
 // Load portfolio
 // ======================================================
 async function load_portfolio(strategy_id) {
@@ -185,14 +185,16 @@ async function load_portfolio(strategy_id) {
   if (overview) {
     const overviewTable = document.createElement("table");
     overviewTable.innerHTML = `
-      <tr><th>Total Value</th><td>${overview.total_value.toFixed(2)}</td></tr>
-      <tr><th>Cash</th><td>${overview.cash.toFixed(2)}</td></tr>
+      <tr><th>Starting Cash</th><td>${overview.starting_cash}</td></tr>
+      <tr><th>Current Cash</th><td>${overview.current_cash}</td></tr>
+      <tr><th>Total Value</th><td>${overview.total_value}</td></tr>
+      <tr><th>Overall Return</th><td>${overview.overall_return.toFixed(2)}%</td></tr>
     `;
     div.appendChild(overviewTable);
   }
 
   // ---- Portfolio ----
-  if (portfolio && portfolio.length > 0) {
+  if (portfolio) {
     const table = document.createElement("table");
     table.innerHTML = `
       <thead>
@@ -201,17 +203,21 @@ async function load_portfolio(strategy_id) {
           <th>Shares</th>
           <th>Price</th>
           <th>Value</th>
+          <th>Weighted Price</th>
+          <th>Return</th>
         </tr>
       </thead>
       <tbody>
-        ${portfolio
+        ${portfolio // Dynamically generate rows without using innerHTML in a loop
           .map(
             (stock) => `
             <tr>
               <td>${stock.ticker}</td>
               <td>${stock.shares}</td>
-              <td>${stock.share_price.toFixed(2)}</td>
-              <td>${stock.total_share_value.toFixed(2)}</td>
+              <td>${stock.share_price}</td>
+              <td>${stock.total_share_value}</td>
+              <td>${stock.weighted_price}</td>
+              <td>${stock.stock_return}%</td>
             </tr>
           `
           )

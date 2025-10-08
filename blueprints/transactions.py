@@ -21,17 +21,17 @@ def select_strategy():
         return abort(400, description="Missing strategy ID")
 
     db = get_db()
-    row = db.execute("SELECT cash FROM strategy WHERE id = ?", (strategy_id,)).fetchone()
+    row = db.execute("SELECT current_cash FROM strategy WHERE id = ?", (strategy_id,)).fetchone()
     if not row:
         close_db()
         return abort(404, description="Strategy not found")
 
-    cash = row["cash"]
+    current_cash = row["current_cash"]
     session["strategy_id"] = int(strategy_id)
-    session["cash"] = float(cash)
+    session["current_cash"] = float(current_cash)
     close_db()
 
-    return jsonify({"status": "success", "strategy_id": strategy_id, "cash": cash}), 200
+    return jsonify({"status": "success", "strategy_id": strategy_id, "cash": current_cash}), 200
 
 
 # =====================================================
@@ -58,12 +58,9 @@ def deposit():
         return abort(400, description="Invalid deposit amount")
 
     db = get_db()
-    current_cash = db.execute(
-        "SELECT cash FROM strategy WHERE id = ?", (strategy_id,)
-    ).fetchone()["cash"]
-
+    current_cash = session["current_cash"]
     new_cash = current_cash + amount
-    db.execute("UPDATE strategy SET cash = ? WHERE id = ?", (new_cash, strategy_id))
+    db.execute("UPDATE strategy SET current_cash = ? WHERE id = ?", (new_cash, strategy_id))
     db.execute(
         "INSERT INTO transactions (strategy_id, type, ticker, shares, price, date) "
         "VALUES (?, ?, ?, ?, ?, ?)",
@@ -72,7 +69,7 @@ def deposit():
     db.commit()
     close_db()
 
-    session["cash"] = new_cash
+    session["current_cash"] = new_cash
     return jsonify({"status": "success", "new_cash": new_cash}), 200
 
 
@@ -84,8 +81,8 @@ def withdraw():
     response = request.get_json()
     amount = response.get("amount")
     strategy_id = session.get("strategy_id")
-    cash = session.get("cash")
-    if not strategy_id or cash is None:
+    current_cash = session.get("current_cash")
+    if not strategy_id or current_cash is None:
         return abort(400, description="No active strategy")
     if amount is None:
         return abort(400, description="Missing withdraw amount")
@@ -93,14 +90,14 @@ def withdraw():
         amount = float(amount)
         if amount <= 0:
             return abort(400, description="Withdraw must be positive")
-        if amount > cash:
+        if amount > current_cash:
             return abort(400, description="Insufficient cash balance")
     except ValueError:
         return abort(400, description="Invalid withdraw amount")
     
-    new_cash = cash - amount
+    new_cash = current_cash - amount
     db = get_db()
-    db.execute("UPDATE strategy SET cash = ? WHERE id = ?", (new_cash, strategy_id))
+    db.execute("UPDATE strategy SET current_cash = ? WHERE id = ?", (new_cash, strategy_id))
     db.execute(
         "INSERT INTO transactions (strategy_id, type, ticker, shares, price, date) "
         "VALUES (?, ?, ?, ?, ?, ?)",
@@ -109,7 +106,7 @@ def withdraw():
     db.commit()
     close_db()
 
-    session["cash"] = new_cash
+    session["current_cash"] = new_cash
     return jsonify({"status": "success", "new_cash": new_cash}), 200
 
 
@@ -142,8 +139,8 @@ def get_quote():
 def buy():
     """Buy shares of a given ticker."""
     strategy_id = session.get("strategy_id")
-    cash = session.get("cash")
-    if not strategy_id or cash is None:
+    current_cash = session.get("current_cash")
+    if not strategy_id or current_cash is None:
         return abort(400, description="No active strategy")
 
     # Parsing data from request
@@ -164,7 +161,7 @@ def buy():
 
     # Comparing cost to cash balance
     cost = price * shares
-    if cost > cash:
+    if cost > current_cash:
         return abort(400, description="Insufficient cash balance")
 
     db = get_db()
@@ -191,12 +188,12 @@ def buy():
         "VALUES (?, ?, ?, ?, ?, ?)",
         (strategy_id, "buy", ticker, shares, price, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
     )
-    new_cash = cash - cost
-    db.execute("UPDATE strategy SET cash = ? WHERE id = ?", (new_cash, strategy_id))
+    new_cash = current_cash - cost
+    db.execute("UPDATE strategy SET current_cash = ? WHERE id = ?", (new_cash, strategy_id))
     db.commit()
     close_db()
 
-    session["cash"] = new_cash
+    session["current_cash"] = new_cash
     return jsonify({"status": "success", "ticker": ticker, "shares": shares, "cost": cost}), 200
 
 
@@ -207,8 +204,8 @@ def buy():
 def sell():
     """Sell shares from a given ticker."""
     strategy_id = session.get("strategy_id")
-    cash = session.get("cash")
-    if not strategy_id or cash is None:
+    current_cash = session.get("current_cash")
+    if not strategy_id or current_cash is None:
         return abort(400, description="No active strategy")
 
     # Parsing data from request
@@ -250,15 +247,15 @@ def sell():
     )
 
     # Record transaction and add cash
-    new_cash = cash + revenue
+    new_cash = current_cash + revenue
     db.execute(
         "INSERT INTO transactions (strategy_id, type, ticker, shares, price, date) "
         "VALUES (?, ?, ?, ?, ?, ?)",
         (strategy_id, "sell", ticker, shares, price, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
     )
-    db.execute("UPDATE strategy SET cash = ? WHERE id = ?", (new_cash, strategy_id))
+    db.execute("UPDATE strategy SET current_cash = ? WHERE id = ?", (new_cash, strategy_id))
     db.commit()
     close_db()
 
-    session["cash"] = new_cash
+    session["current_cash"] = new_cash
     return jsonify({"status": "success", "ticker": ticker, "shares": shares, "revenue": revenue}), 200

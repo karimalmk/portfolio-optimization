@@ -8,6 +8,9 @@ def lookup(ticker: str):
         stock = yf.Ticker(ticker)
         info = stock.info  # fetches metadata & price info
 
+        # download = yf.download(ticker)
+        # print(download)
+
         # Some tickers (like ETFs) might not have "longName"
         name = info.get("longName") or info.get("shortName") or ticker
 

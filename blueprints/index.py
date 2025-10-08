@@ -1,3 +1,4 @@
+from http.client import CannotSendHeader
 from sqlite3 import IntegrityError
 from flask import request, abort, jsonify
 
@@ -32,7 +33,7 @@ def create_strategy():
         return abort(400, description="Cash must be numeric")
 
     try:
-        db.execute("INSERT INTO strategy (name, cash) VALUES (?, ?)", (name, cash))
+        db.execute("INSERT INTO strategy (name, starting_cash, current_cash) VALUES (?, ?, ?)", (name, cash, cash))
         db.commit()
     except IntegrityError:
         close_db()
@@ -40,7 +41,7 @@ def create_strategy():
 
     strategy_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
     close_db()
-    return jsonify({"id": strategy_id, "name": name, "cash": cash}), 201
+    return jsonify({"status": "success", "id": strategy_id, "name": name, "cash": cash}), 201
 
 
 # =====================================================
@@ -49,9 +50,9 @@ def create_strategy():
 @bp.route("/api/strategies", methods=["GET"])
 def get_strategies():
     db = get_db()
-    rows = db.execute("SELECT id, name, cash, total_value FROM strategy ORDER BY id ASC").fetchall()
+    rows = db.execute("SELECT id, name, current_cash, total_value FROM strategy ORDER BY id ASC").fetchall()
     strategies = [
-        {"id": row["id"], "name": row["name"], "cash": row["cash"], "total_value": row["total_value"]}
+        {"id": row["id"], "name": row["name"], "cash": row["current_cash"], "total_value": row["total_value"]}
         for row in rows
     ]
     close_db()
@@ -64,58 +65,85 @@ def get_strategies():
 @bp.route("/api/portfolio/<int:id>", methods=["GET"])
 def display_portfolio(id):
     db = get_db()
-    update_portfolio(db, id)
+    starting_cash = db.execute("SELECT starting_cash FROM strategy WHERE id = ?", (id,)).fetchone()[0]
+    current_cash = db.execute("SELECT current_cash FROM strategy WHERE id = ?", (id,)).fetchone()[0]
 
-    # Fetch strategy overview data
-    overview_row = db.execute(
-        "SELECT cash, total_value FROM strategy WHERE id = ?", (id,)
-    ).fetchone()
-    overview = {"cash": overview_row["cash"], "total_value": overview_row["total_value"]} if overview_row else None
-    
-    # Fetch all holdings
-    rows = db.execute(
-        "SELECT ticker, shares FROM portfolio WHERE strategy_id = ?", (id,)
-    ).fetchall()
+    portfolio_analytics = get_portfolio_analytics(id, db, starting_cash, current_cash)
+    total_value = portfolio_analytics["total_value"]
+    overall_return = portfolio_analytics["overall_return"]
+    portfolio = portfolio_analytics["portfolio"]
 
-    if not rows:
-        close_db()
-        return jsonify({"portfolio": [], "overview": overview}), 200
+    # Update strategy total value in DB
+    db.execute("UPDATE strategy SET total_value = ? WHERE id = ?", (total_value, id))
 
-    portfolio = []
-    for row in rows:
-        quote = lookup(row["ticker"])
-        if not quote or "price" not in quote:
-            continue
-        share_price = quote["price"]
-        total_share_value = row["shares"] * share_price
-        portfolio.append({
-            "ticker": row["ticker"],
-            "shares": row["shares"],
-            "share_price": share_price,
-            "total_share_value": total_share_value
-        })
+    overview = {
+        "starting_cash": starting_cash,
+        "current_cash": current_cash,
+        "total_value": total_value,
+        "overall_return": overall_return
+    }
 
+    db.commit()
     close_db()
     return jsonify({"portfolio": portfolio, "overview": overview}), 200
 
 
+# Helper function to calculate portfolio analytics
+def get_portfolio_analytics(id, db, starting_cash, current_cash):
+    # Fetch all portfolio stocks
+    portfolio_stocks = db.execute(
+        "SELECT ticker, shares FROM portfolio WHERE strategy_id = ?", (id,)
+    ).fetchall()
 
-def update_portfolio(db, strategy_id):
-    """Recalculate and update total portfolio value for a strategy."""
-    rows = db.execute("SELECT ticker, shares FROM portfolio WHERE strategy_id = ?", (strategy_id,)).fetchall()
-    total_value = 0
-
-    for row in rows:
-        quote = lookup(row["ticker"])
+    portfolio = []
+    total_value = current_cash  # Start with current cash
+    for stock in portfolio_stocks:
+        ticker = stock["ticker"]
+        quote = lookup(ticker)
         if not quote or "price" not in quote:
             continue  # skip broken tickers instead of crashing
-        total_value += row["shares"] * quote["price"]
+        share_price = quote["price"]
+        shares = stock["shares"]
+        total_share_value = shares * share_price
+        
+        # Adding each stock's contribution to total_value
+        total_value += total_share_value
+        
+        purchase_list = db.execute(
+            "SELECT price, shares FROM transactions WHERE strategy_id = ? AND ticker = ? AND type = 'buy'",
+            (id, ticker)
+        ).fetchall()
 
-    cash_row = db.execute("SELECT cash FROM strategy WHERE id = ?", (strategy_id,)).fetchone()
-    cash = cash_row["cash"] if cash_row else 0
-    db.execute("UPDATE strategy SET total_value = ? WHERE id = ?", (total_value + cash, strategy_id))
-    db.commit()
+        sale_list = db.execute(
+            "SELECT price, shares FROM transactions WHERE strategy_id = ? AND ticker = ? AND type = 'sell'",
+            (id, ticker)
+        ).fetchall()
 
+        # Weighted average purchase price
+        total_spend = sum(purchase["price"] * purchase["shares"] for purchase in purchase_list) - \
+                      sum(sale["price"] * sale["shares"] for sale in sale_list)
+        weighted_price = total_spend / shares if shares else 0
+
+        # Calculate stock return
+        stock_return = ((share_price - weighted_price) / weighted_price * 100) if weighted_price else 0
+        stock_return = round(stock_return, 2)
+
+        portfolio.append({
+            "ticker": ticker,
+            "shares": shares,
+            "share_price": share_price,
+            "total_share_value": total_share_value,
+            "weighted_price": weighted_price,
+            "stock_return": stock_return
+        })
+
+    total_value = round(total_value, 2)
+    overall_return = ((total_value - starting_cash) / starting_cash * 100) if starting_cash else 0
+    overall_return = round(overall_return, 2)
+
+    return { "portfolio": (portfolio if portfolio else None), 
+            "total_value": total_value, 
+            "overall_return": overall_return }
 
 # =====================================================
 # Rename Strategy

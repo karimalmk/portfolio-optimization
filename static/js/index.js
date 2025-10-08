@@ -11,9 +11,18 @@ document
       method: "POST",
       body: formData,
     });
+
+    // ----- Checking valid entries and server status -----
+    const name = formData.get("name");
+    if (!name) return alert("Enter a strategy name.");
+
+    const cash = formData.get("cash");
+    if (!cash || isNaN(cash) || cash <= 0)
+      return alert("Enter a valid cash amount.");
+
     const data = await response.json();
-    await append_strategy(data);
     if (data.status == "success") {
+      await append_strategy(data);
       alert(`Strategy "${data.name}" created with initial cash ${data.cash}`);
       this.reset();
     }
@@ -82,7 +91,7 @@ document.addEventListener("click", async (event) => {
   // ----- Edit Mode -----
   if (target.id === "edit-strategy") {
     const response = await fetch("/api/strategies");
-    if (!response.ok) return alert("Failed to load strategies");
+    if (!response.ok) return alert("Failed to load strategies.");
 
     const data = await response.json();
     const strategies = data.strategies;
@@ -123,7 +132,7 @@ document.addEventListener("click", async (event) => {
   if (target.id.startsWith("confirm-rename-")) {
     const id = target.id.replace("confirm-rename-", "");
     const newName = document.getElementById(`new-name-${id}`).value.trim();
-    if (!newName) return alert("Enter a new name");
+    if (!newName) return alert("Enter a new name.");
 
     const response = await fetch(`/api/rename-strategy/${id}`, {
       method: "PUT",
@@ -153,7 +162,7 @@ document.addEventListener("click", async (event) => {
       if (!stillExists) document.getElementById("strategy-content")?.remove();
       else await load_strategies_dropdown();
     } else {
-      alert("Failed to delete strategy");
+      alert("Failed to delete strategy.");
     }
   }
 
@@ -181,14 +190,16 @@ async function load_portfolio(strategy_id) {
   if (!div) return;
   div.innerHTML = "";
 
-  // ---- Overview ----
+  // ----- Overview -----
   if (overview) {
     const overviewTable = document.createElement("table");
     overviewTable.innerHTML = `
       <tr><th>Starting Cash</th><td>${overview.starting_cash}</td></tr>
       <tr><th>Current Cash</th><td>${overview.current_cash}</td></tr>
       <tr><th>Total Value</th><td>${overview.total_value}</td></tr>
-      <tr><th>Overall Return</th><td>${overview.overall_return.toFixed(2)}%</td></tr>
+      <tr><th>Overall Return</th><td>${overview.overall_return.toFixed(
+        2
+      )}%</td></tr>
     `;
     div.appendChild(overviewTable);
   }

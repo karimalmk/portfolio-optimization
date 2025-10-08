@@ -4,6 +4,8 @@
 const strategySelect = document.getElementById("transactions-strategy");
 const validActions = ["deposit", "withdraw", "buy", "sell"];
 
+let selection_status = false;
+
 if (strategySelect) {
   strategySelect.addEventListener("change", async (event) => {
     const strategy_id = event.target.value;
@@ -19,8 +21,9 @@ if (strategySelect) {
 
     if (data.status === "success") {
       console.log("Strategy selected:", strategy_id);
+      selection_status = true;
     } else {
-      alert("Failed to select strategy.");
+      alert(data.message);
     }
   });
 }
@@ -42,21 +45,21 @@ document.addEventListener("click", async (event) => {
     if (action === "deposit") {
       form = document.createElement("form");
       form.innerHTML = `
-        <input type="number" id="deposit-amount" min="1" placeholder="Enter Amount" required />
+        <input type="number" id="deposit-amount" min="1" placeholder="Enter Amount" />
         <button id="confirm-deposit" type="button">Confirm</button>
       `;
     } else if (action === "withdraw") {
       form = document.createElement("form");
       form.innerHTML = `
-      <input type="number" id="withdraw-amount" min="1" placeholder="Enter Amount" required />
+      <input type="number" id="withdraw-amount" min="1" placeholder="Enter Amount" />
       <button id="confirm-withdraw" type="button">Confirm</button>
     `;
     } else if (action === "buy") {
       form = document.createElement("form");
       form.id = "buy-form";
       form.innerHTML = `
-      <input type="text" id="ticker" placeholder="Enter Ticker" required />
-      <input type="number" id="shares" placeholder="Enter Shares" min="1" required />
+      <input type="text" id="ticker" placeholder="Enter Ticker" />
+      <input type="number" id="shares" placeholder="Enter Shares" min="1" />
       <button id="get-quote" type="button">Get Quote</button>
       <div id="quote-result"></div>
     `;
@@ -64,8 +67,8 @@ document.addEventListener("click", async (event) => {
       form = document.createElement("form");
       form.id = "sell-form";
       form.innerHTML = `
-        <input type="text" id="ticker" placeholder="Enter Ticker" required />
-        <input type="number" id="shares" placeholder="Enter Shares" min="1" required />
+        <input type="text" id="ticker" placeholder="Enter Ticker" />
+        <input type="number" id="shares" placeholder="Enter Shares" min="1" />
         <button id="get-quote" type="button">Get Quote</button>
         <div id="quote-result"></div>
       `;
@@ -80,10 +83,9 @@ document.addEventListener("click", async (event) => {
 
   // ----- Deposit handler -----
   if (event.target.id === "confirm-deposit") {
-    const strategy = document.getElementById("transactions-strategy");
     const amount = document.getElementById("deposit-amount")?.valueAsNumber;
 
-    if (!strategy?.value) return alert("Please select a strategy first.");
+    if (!selection_status) return alert("Please select a strategy first.");
     if (!Number.isFinite(amount) || amount <= 0)
       return alert("Enter a valid amount.");
 
@@ -98,18 +100,18 @@ document.addEventListener("click", async (event) => {
       console.log(data);
       alert(`Deposit successful! ${data.new_cash} is your new cash balance.`);
     } else {
-      alert("Error processing deposit.");
+      alert(data.message);
     }
   }
 
   // ----- Withdraw handler -----
   if (event.target.id === "confirm-withdraw") {
-    const strategy = document.getElementById("transactions-strategy");
     const amount = document.getElementById("withdraw-amount")?.valueAsNumber;
 
-    if (!strategy?.value) return alert("Please select a strategy first.");
-    if (!Number.isFinite(amount) || amount <= 0)
+    if (!selection_status) return alert("Please select a strategy first.");
+    if (!Number.isFinite(amount) || amount <= 0) {
       return alert("Enter a valid amount.");
+    }
 
     const response = await fetch("/transactions/api/withdraw", {
       method: "POST",
@@ -124,17 +126,16 @@ document.addEventListener("click", async (event) => {
         `Withdrawal successful! ${data.new_cash} is your new cash balance.`
       );
     } else {
-      alert("Error processing withdrawal.");
+      alert(data.message);
     }
   }
 
   // ----- Quote handler -----
   if (event.target.id === "get-quote") {
-    const strategy = document.getElementById("transactions-strategy");
     const ticker = document.getElementById("ticker")?.value?.trim();
     const shares = document.getElementById("shares")?.valueAsNumber;
 
-    if (!strategy?.value) return alert("Please select a strategy first.");
+    if (!selection_status) return alert("Please select a strategy first.");
     if (!ticker) return alert("Enter a valid ticker.");
     if (!Number.isFinite(shares) || shares <= 0)
       return alert("Enter a valid number of shares.");
@@ -189,7 +190,7 @@ document.addEventListener("click", async (event) => {
         console.log(data);
         alert("Purchase successful!");
       } else {
-        alert("Error processing purchase.");
+        alert(data.message);
       }
     }
 
@@ -208,7 +209,7 @@ document.addEventListener("click", async (event) => {
         console.log(data);
         alert("Sale successful!");
       } else {
-        alert("Error processing sale.");
+        alert(data.message);
       }
     }
   }

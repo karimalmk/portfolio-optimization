@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Blueprint, render_template, g
+from flask import Blueprint, jsonify, render_template, g
 from werkzeug.exceptions import HTTPException
 
 # ============================
@@ -20,16 +20,16 @@ def close_db(e=None):
 # Error Handlers
 # ============================
 def register_error_handlers(app):
-    @app.errorhandler(HTTPException) # This decorator handles all HTTP exceptions
-    def handle_http_exception(e): # e is an instance of HTTPException
-        messages = {
-            400: "Bad request – user input error",
-            404: "Page not found",
-            500: "Server error",
-            502: "API error – service unavailable"
-        }
-        message = messages.get(e.code, e.description)
-        return render_template("error.html", message=message), e.code
+    """Register JSON error handlers for the Flask app."""
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(e):
+        response = jsonify({
+            "status": "fail",
+            "message": e.description,
+            "code": e.code
+        })
+        response.status_code = e.code
+        return response
 
 # ============================
 # Blueprint Factory

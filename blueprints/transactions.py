@@ -1,5 +1,4 @@
 from datetime import datetime
-from http.client import TOO_EARLY
 from flask import request, session, abort, jsonify
 
 # Custom modules
@@ -18,13 +17,13 @@ def select_strategy():
     """Store selected strategy in session."""
     strategy_id = request.form.get("strategy_id")
     if not strategy_id:
-        return abort(400, description="Missing strategy ID")
+        return abort(400, description="Missing strategy ID.")
 
     db = get_db()
     row = db.execute("SELECT current_cash FROM strategy WHERE id = ?", (strategy_id,)).fetchone()
     if not row:
         close_db()
-        return abort(404, description="Strategy not found")
+        return abort(404, description="Strategy not found.")
 
     current_cash = row["current_cash"]
     session["strategy_id"] = int(strategy_id)
@@ -42,20 +41,20 @@ def deposit():
     """Deposit funds into the current strategy."""
     strategy_id = session.get("strategy_id")
     if not strategy_id:
-        return abort(400, description="No active strategy")
+        return abort(400, description="No active strategy.")
 
     data = request.get_json(silent=True) or {}
     amount = data.get("amount")
 
     if amount is None:
-        return abort(400, description="Missing deposit amount")
+        return abort(400, description="Missing deposit amount.")
 
     try:
         amount = float(amount)
         if amount <= 0:
-            return abort(400, description="Deposit must be positive")
+            return abort(400, description="Deposit must be positive.")
     except ValueError:
-        return abort(400, description="Invalid deposit amount")
+        return abort(400, description="Invalid deposit amount.")
 
     db = get_db()
     current_cash = session["current_cash"]
@@ -83,17 +82,17 @@ def withdraw():
     strategy_id = session.get("strategy_id")
     current_cash = session.get("current_cash")
     if not strategy_id or current_cash is None:
-        return abort(400, description="No active strategy")
+        return abort(400, description="No active strategy.")
     if amount is None:
-        return abort(400, description="Missing withdraw amount")
+        return abort(400, description="Missing withdraw amount.")
     try:
         amount = float(amount)
         if amount <= 0:
-            return abort(400, description="Withdraw must be positive")
+            return abort(400, description="Withdraw must be positive.")
         if amount > current_cash:
-            return abort(400, description="Insufficient cash balance")
+            return abort(400, description="Insufficient cash balance.")
     except ValueError:
-        return abort(400, description="Invalid withdraw amount")
+        return abort(400, description="Invalid withdraw amount.")
     
     new_cash = current_cash - amount
     db = get_db()
@@ -118,30 +117,29 @@ def get_quote():
     data = request.get_json()
     ticker = data.get("ticker", "").strip().upper()
     if not ticker:
-        return abort(400, description="Missing ticker")
+        return abort(400, description="Missing ticker.")
     shares = data.get("shares")
     if shares is None:
-        return abort(400, description="Missing shares")
+        return abort(400, description="Missing shares.")
     try:
         shares = float(shares)
     except ValueError:
-        return abort(400, description="Invalid shares value")
+        return abort(400, description="Invalid shares value.")
     
     quote = lookup(ticker)
     if not quote or "price" not in quote:
-        return abort(502, description=f"Failed to fetch quote for {ticker}")
+        return abort(502, description=f"Failed to fetch quote for {ticker}.")
 
     price = round(quote["price"], 2)
-    total = price * shares
-    return jsonify({"ticker": ticker, "shares": shares, "price": price, "total": total})
+    total = round(price * shares, 2)
+    return jsonify({"status": "success", "ticker": ticker, "shares": shares, "price": price, "total": total})
 
 @bp.route("/transactions/api/buy", methods=["POST"])
 def buy():
-    """Buy shares of a given ticker."""
     strategy_id = session.get("strategy_id")
     current_cash = session.get("current_cash")
     if not strategy_id or current_cash is None:
-        return abort(400, description="No active strategy")
+        return abort(400, description="No active strategy.")
 
     # Parsing data from request
     data = request.get_json()
@@ -150,19 +148,19 @@ def buy():
     price = data.get("price")
 
     if not ticker or shares is None or price is None:
-        return abort(400, description="Missing ticker, shares, or price")
+        return abort(400, description="Missing ticker, shares, or price.")
 
     try:
         shares = float(shares)
         if shares <= 0:
-            return abort(400, description="Shares must be positive")
+            return abort(400, description="Shares must be positive.")
     except ValueError:
-        return abort(400, description="Invalid shares value")
+        return abort(400, description="Invalid shares value.")
 
     # Comparing cost to cash balance
     cost = price * shares
     if cost > current_cash:
-        return abort(400, description="Insufficient cash balance")
+        return abort(400, description="Insufficient cash balance.")
 
     db = get_db()
 
@@ -206,7 +204,7 @@ def sell():
     strategy_id = session.get("strategy_id")
     current_cash = session.get("current_cash")
     if not strategy_id or current_cash is None:
-        return abort(400, description="No active strategy")
+        return abort(400, description="No active strategy.")
 
     # Parsing data from request
     data = request.get_json()
@@ -215,14 +213,14 @@ def sell():
     price = data.get("price")
 
     if not ticker or shares is None or not price:
-        return abort(400, description="Missing ticker, shares, or price")
+        return abort(400, description="Missing ticker, shares, or price.")
 
     try:
         shares = float(shares)
         if shares <= 0:
             return abort(400, description="Shares must be positive")
     except ValueError:
-        return abort(400, description="Invalid shares value")
+        return abort(400, description="Invalid shares value.")
 
     db = get_db()
     row = db.execute(
@@ -230,20 +228,22 @@ def sell():
     ).fetchone()
     existing_shares = float(row["shares"]) if row else 0.0
 
-    if existing_shares < shares:
+    # Check feasibility of sale
+    if not existing_shares or existing_shares < shares:
         close_db()
-        return abort(400, description="Not enough shares to sell")
+        return abort(400, description="Insufficient shares to sell.")
 
     revenue = price * shares
 
-    # Reduce or remove position
-    db.execute(
-        "UPDATE portfolio SET shares = shares - ? WHERE strategy_id = ? AND ticker = ?",
+    # Remove position if all shares sold or reduce position
+    if existing_shares == shares:
+        db.execute(
+            "DELETE FROM portfolio WHERE strategy_id = ? AND ticker = ?",
+            (strategy_id, ticker),
+        )
+        db.execute(
+            "UPDATE portfolio SET shares = shares - ? WHERE strategy_id = ? AND ticker = ?",
         (shares, strategy_id, ticker),
-    )
-    db.execute(
-        "DELETE FROM portfolio WHERE strategy_id = ? AND ticker = ? AND shares <= 0",
-        (strategy_id, ticker),
     )
 
     # Record transaction and add cash
@@ -257,5 +257,4 @@ def sell():
     db.commit()
     close_db()
 
-    session["current_cash"] = new_cash
     return jsonify({"status": "success", "ticker": ticker, "shares": shares, "revenue": revenue}), 200

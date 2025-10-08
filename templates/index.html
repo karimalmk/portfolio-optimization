@@ -1,5 +1,5 @@
-{% extends "layout.html" %} {% block title %} Home Page {% endblock %} {% block
-main %} Create a new strategy:
+{% extends "layout.html" %} {% block title %} Home {% endblock %} {% block main
+%} Create a new strategy:
 
 <form id="create-strategy" method="POST" action="/api/create-strategy">
   <input
@@ -8,15 +8,8 @@ main %} Create a new strategy:
     autofocus
     name="name"
     placeholder="Strategy Name"
-    required
   />
-  <input
-    type="text"
-    autocomplete="off"
-    name="cash"
-    placeholder="Cash Amount"
-    required
-  />
+  <input type="text" autocomplete="off" name="cash" placeholder="Cash Amount" />
   <button type="submit">Create Strategy</button>
 </form>
 

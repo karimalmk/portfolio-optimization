@@ -1,4 +1,3 @@
-from http.client import CannotSendHeader
 from sqlite3 import IntegrityError
 from flask import request, abort, jsonify
 

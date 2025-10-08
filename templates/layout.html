@@ -23,15 +23,16 @@
   <body>
     <header>
       <h1>Portfolio Analytics</h1>
-      <hr />
       <nav>
         <a href="/">Home</a>
         <a href="/transactions">Transactions</a>
       </nav>
       {% block header %} {% endblock %}
     </header>
+    <hr />
     <main>{% block main %} {% endblock %}</main>
     <footer>
+      <hr /> <!-- ensures hr is flush with footer -->
       <p>&copy; 2025 Portfolio Analytics</p>
     </footer>
   </body>

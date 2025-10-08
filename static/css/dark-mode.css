@@ -1,5 +1,5 @@
 /* =========================
-Main styles
+Global styles
 ========================== */
 html,
 body {
@@ -16,11 +16,53 @@ main {
   flex: 1;
 }
 
+/* =========================
+Header & Navigation
+========================== */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px; /* ensures hr is visible below header */
+}
+
+header h1 {
+  margin: 0; /* avoids pushing hr down */
+}
+
+nav {
+  display: flex;
+  gap: 15px;
+}
+
+nav a {
+  color: #4da3ff;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* Force hr to show clearly below header */
+hr {
+  border: 1px solid #333;
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+/* =========================
+Footer
+========================== */
 footer {
   height: 30px;
   color: #e0e0e0;
 }
 
+/* =========================
+Tables
+========================== */
 table {
   width: 50%;
   border-collapse: collapse;
@@ -44,9 +86,11 @@ tr:nth-child(even) {
 }
 
 /* =========================
-Components styles 
+Form Components
 ========================== */
-input {
+input,
+select,
+button {
   background-color: #1e1e1e;
   color: #e0e0e0;
   border: 1px solid #333;
@@ -56,17 +100,10 @@ input {
 
 button {
   background-color: #333;
-  color: #e0e0e0;
-  border: none;
   border: 1px solid #444;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  cursor: pointer;
 }
 
-select {
-  background-color: #1e1e1e;
-  color: #e0e0e0;
-  border: 1px solid #333;
-  margin-top: 5px;
-  margin-bottom: 5px;
+button:hover {
+  background-color: #444;
 }

@@ -5,8 +5,9 @@
 
 
 ## Current bugs:
-- Whenever you rename and reload the strategies drop-down, you must auto-select the portfolio which was last/previously selected!
-    - Review the load strategies dropdown for default selection
+- Whenever you rename and reload the strategies drop-down, you must auto-select the portfolio which was last/previously selected! (index.js)
+    - Review the load strategies dropdown for default selection (index.js)
+- Fix weighted average price on stock basis (index.py)
 
 ## Learning opportunities:
 - Know when to use which HTTP request

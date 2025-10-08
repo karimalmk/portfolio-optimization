@@ -1,3 +1,4 @@
 flask
 requests
 sqlite3
+yfinance

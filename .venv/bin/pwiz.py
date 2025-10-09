@@ -1,4 +1,4 @@
-#!/home/kmalmk/portfolio-analytics/.venv/bin/python3
+#!/home/kmalmk/portfolio-optimization/.venv/bin/python3
 
 import datetime
 import os

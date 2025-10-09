@@ -2,8 +2,8 @@ from sqlite3 import IntegrityError
 from flask import request, abort, jsonify
 
 # Custom modules
-from setup import get_db, close_db, create_blueprint, register_error_handlers
-from api import load_cache, lookup
+from helpers.setup import get_db, close_db, create_blueprint, register_error_handlers
+from helpers.api import load_cache, lookup
 
 bp = create_blueprint("index")
 

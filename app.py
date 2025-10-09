@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template
-from setup import register_error_handlers, get_db, usd, gbp, eur
+from helpers.setup import register_error_handlers, get_db, usd, gbp, eur
 
 # Importing blueprints
 from blueprints.transactions import bp as transactions_bp

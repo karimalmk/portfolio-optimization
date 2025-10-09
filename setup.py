@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Blueprint, jsonify, render_template, g
+from flask import Blueprint, jsonify, g
 from werkzeug.exceptions import HTTPException
 
 # ============================

@@ -1,29 +1,34 @@
 // ==================================================
 // Strategy selection handler
 // ==================================================
-const strategySelect = document.getElementById("transactions-strategy");
-const validActions = ["deposit", "withdraw", "buy", "sell"];
-
+const strategy_selection = document.getElementById("transactions-strategy");
+const valid_actions = ["deposit", "withdraw", "buy", "sell"];
 let selection_status = false;
 
-if (strategySelect) {
-  strategySelect.addEventListener("change", async (event) => {
+if (strategy_selection) {
+  strategy_selection.addEventListener("change", async (event) => {
     const strategy_id = event.target.value;
     if (!strategy_id) return;
 
-    const response = await fetch("/transactions/api/strategy", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ strategy_id }),
-    });
+    try {
+      const response = await fetch("/transactions/api/strategy", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ strategy_id }),
+      });
 
-    const data = await response.json();
+      if (!response.ok) throw new Error("Failed to select strategy.");
 
-    if (data.status === "success") {
-      console.log("Strategy selected:", strategy_id);
-      selection_status = true;
-    } else {
-      alert(data.message);
+      const data = await response.json();
+      if (data.status === "success") {
+        console.log("Strategy selected:", strategy_id);
+        selection_status = true;
+      } else {
+        alert(data.message || "Failed to select strategy.");
+      }
+    } catch (err) {
+      console.error("Error selecting strategy:", err);
+      alert("Server error while selecting strategy.");
     }
   });
 }
@@ -34,183 +39,165 @@ if (strategySelect) {
 document.addEventListener("click", async (event) => {
   const action = event.target.dataset.action;
   const placeholder = document.getElementById("input-placeholder");
+  if (!placeholder) return;
 
-  if (validActions.includes(action)) {
-    // Clear previous form
+  // ----- Action form rendering -----
+  if (valid_actions.includes(action)) {
     placeholder.innerHTML = "";
+    const form = document.createElement("form");
 
-    let form;
+    switch (action) {
+      case "deposit":
+        form.innerHTML = `
+          <input type="number" id="deposit-amount" min="1" placeholder="Enter Amount" />
+          <button id="confirm-deposit" type="button">Confirm</button>
+        `;
+        break;
 
-    // ----- Dynamic form creation -----
-    if (action === "deposit") {
-      form = document.createElement("form");
-      form.innerHTML = `
-        <input type="number" id="deposit-amount" min="1" placeholder="Enter Amount" />
-        <button id="confirm-deposit" type="button">Confirm</button>
-      `;
-    } else if (action === "withdraw") {
-      form = document.createElement("form");
-      form.innerHTML = `
-      <input type="number" id="withdraw-amount" min="1" placeholder="Enter Amount" />
-      <button id="confirm-withdraw" type="button">Confirm</button>
-    `;
-    } else if (action === "buy") {
-      form = document.createElement("form");
-      form.id = "buy-form";
-      form.innerHTML = `
-      <input type="text" id="ticker" placeholder="Enter Ticker" />
-      <input type="number" id="shares" placeholder="Enter Shares" min="1" />
-      <button id="get-quote" type="button">Get Quote</button>
-      <div id="quote-result"></div>
-    `;
-    } else if (action === "sell") {
-      form = document.createElement("form");
-      form.id = "sell-form";
-      form.innerHTML = `
-        <input type="text" id="ticker" placeholder="Enter Ticker" />
-        <input type="number" id="shares" placeholder="Enter Shares" min="1" />
-        <button id="get-quote" type="button">Get Quote</button>
-        <div id="quote-result"></div>
-      `;
+      case "withdraw":
+        form.innerHTML = `
+          <input type="number" id="withdraw-amount" min="1" placeholder="Enter Amount" />
+          <button id="confirm-withdraw" type="button">Confirm</button>
+        `;
+        break;
+
+      case "buy":
+      case "sell":
+        form.id = `${action}-form`;
+        form.innerHTML = `
+          <input type="text" id="ticker" placeholder="Enter Ticker" />
+          <input type="number" id="shares" placeholder="Enter Shares" min="1" />
+          <button id="get-quote" type="button">Get Quote</button>
+          <div id="quote-result"></div>
+        `;
+        break;
     }
 
-    // Append and focus on the first input
-    if (form) {
-      placeholder.appendChild(form);
-      form.querySelector("input")?.focus();
-    }
+    placeholder.appendChild(form);
+    form.querySelector("input")?.focus();
   }
 
   // ----- Deposit handler -----
   if (event.target.id === "confirm-deposit") {
     const amount = document.getElementById("deposit-amount")?.valueAsNumber;
-
     if (!selection_status) return alert("Please select a strategy first.");
-    if (!Number.isFinite(amount) || amount <= 0)
-      return alert("Enter a valid amount.");
+    if (!Number.isFinite(amount) || amount <= 0) return alert("Enter a valid amount.");
 
-    const response = await fetch("/transactions/api/deposit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount }),
-    });
+    try {
+      const response = await fetch("/transactions/api/deposit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
 
-    const data = await response.json();
-    if (data.status === "success") {
-      console.log(data);
-      alert(`Deposit successful! ${data.new_cash} is your new cash balance.`);
-    } else {
-      alert(data.message);
+      const data = await response.json();
+      if (data.status === "success") {
+        console.log(data);
+        alert(`Deposit successful! New cash balance: ${data.new_cash}`);
+      } else {
+        alert(data.message || "Deposit failed.");
+      }
+    } catch (err) {
+      console.error("Deposit error:", err);
+      alert("Server error during deposit.");
     }
   }
 
   // ----- Withdraw handler -----
   if (event.target.id === "confirm-withdraw") {
     const amount = document.getElementById("withdraw-amount")?.valueAsNumber;
-
     if (!selection_status) return alert("Please select a strategy first.");
-    if (!Number.isFinite(amount) || amount <= 0) {
-      return alert("Enter a valid amount.");
-    }
+    if (!Number.isFinite(amount) || amount <= 0) return alert("Enter a valid amount.");
 
-    const response = await fetch("/transactions/api/withdraw", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount }),
-    });
+    try {
+      const response = await fetch("/transactions/api/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
 
-    const data = await response.json();
-    if (data.status === "success") {
-      console.log(data);
-      alert(
-        `Withdrawal successful! ${data.new_cash} is your new cash balance.`
-      );
-    } else {
-      alert(data.message);
+      const data = await response.json();
+      if (data.status === "success") {
+        console.log(data);
+        alert(`Withdrawal successful! New cash balance: ${data.new_cash}`);
+      } else {
+        alert(data.message || "Withdrawal failed.");
+      }
+    } catch (err) {
+      console.error("Withdraw error:", err);
+      alert("Server error during withdrawal.");
     }
   }
 
   // ----- Quote handler -----
   if (event.target.id === "get-quote") {
-    const ticker = document.getElementById("ticker")?.value?.trim();
+    const ticker = document.getElementById("ticker")?.value?.trim().toUpperCase();
     const shares = document.getElementById("shares")?.valueAsNumber;
 
     if (!selection_status) return alert("Please select a strategy first.");
     if (!ticker) return alert("Enter a valid ticker.");
-    if (!Number.isFinite(shares) || shares <= 0)
-      return alert("Enter a valid number of shares.");
+    if (!Number.isFinite(shares) || shares <= 0) return alert("Enter a valid number of shares.");
 
-    const response = await fetch("/transactions/api/quote", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ticker, shares }),
-    });
+    try {
+      const response = await fetch("/transactions/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticker, shares }),
+      });
 
-    const data = await response.json();
-    console.log(data);
+      if (!response.ok) throw new Error("Quote fetch failed.");
+      const data = await response.json();
+      if (data.status !== "success") throw new Error(data.message || "Invalid server response.");
 
-    const quote_placeholder = document.getElementById("quote-result");
-    quote_placeholder.innerHTML = "";
-
-    const quote = document.createElement("table");
-    quote.innerHTML = `
-        <tr><td>Ticker:</td><td>${data.ticker}</td></tr>
-        <tr><td>Shares:</td><td>${data.shares}</td></tr>
-        <tr><td>Price per Share:</td><td>$${data.price}</td></tr>
-        <tr><td>Total Cost:</td><td>$${data.total}</td></tr>
+      const quote_placeholder = document.getElementById("quote-result");
+      quote_placeholder.innerHTML = `
+        <table>
+          <tr><td>Ticker:</td><td>${data.ticker ?? ""}</td></tr>
+          <tr><td>Shares:</td><td>${data.shares ?? 0}</td></tr>
+          <tr><td>Price per Share:</td><td>$${data.price ?? 0}</td></tr>
+          <tr><td>Total Cost:</td><td>$${data.total ?? 0}</td></tr>
+        </table>
+        <button id="confirm-transaction" type="button"
+                data-ticker="${data.ticker}"
+                data-shares="${data.shares}"
+                data-price="${data.price}">
+          Confirm
+        </button>
       `;
-    quote_placeholder.appendChild(quote);
-
-    const button = document.createElement("button");
-    button.innerHTML = `Confirm`;
-    button.id = "confirm-transaction";
-    button.dataset.ticker = data.ticker;
-    button.dataset.shares = data.shares;
-    button.dataset.price = data.price;
-    quote_placeholder.appendChild(button);
+    } catch (err) {
+      console.error("Quote fetch error:", err);
+      alert("Failed to fetch quote. Please try again.");
+    }
   }
 
-  // ----- Execution handler -----
+  // ----- Execution handler (Buy/Sell) -----
   if (event.target.id === "confirm-transaction") {
-    const buy = document.getElementById("buy-form");
-    const sell = document.getElementById("sell-form");
+    const ticker = event.target.dataset.ticker;
+    const shares = Number(event.target.dataset.shares);
+    const price = Number(event.target.dataset.price);
 
-    if (buy) {
-      const response = await fetch("/transactions/api/buy", {
+    if (!selection_status) return alert("Please select a strategy first.");
+    if (!ticker || !shares || !price) return alert("Incomplete transaction data.");
+
+    const endpoint = document.getElementById("buy-form") ? "buy" : "sell";
+
+    try {
+      const response = await fetch(`/transactions/api/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ticker: event.target.dataset.ticker,
-          shares: Number(event.target.dataset.shares),
-          price: Number(event.target.dataset.price),
-        }),
+        body: JSON.stringify({ ticker, shares, price }),
       });
+
       const data = await response.json();
       if (data.status === "success") {
         console.log(data);
-        alert("Purchase successful!");
+        alert(`${endpoint === "buy" ? "Purchase" : "Sale"} successful!`);
       } else {
-        alert(data.message);
+        alert(data.message || "Transaction failed.");
       }
-    }
-
-    if (sell) {
-      const response = await fetch("/transactions/api/sell", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ticker: event.target.dataset.ticker,
-          shares: Number(event.target.dataset.shares),
-          price: Number(event.target.dataset.price),
-        }),
-      });
-      const data = await response.json();
-      if (data.status === "success") {
-        console.log(data);
-        alert("Sale successful!");
-      } else {
-        alert(data.message);
-      }
+    } catch (err) {
+      console.error("Transaction error:", err);
+      alert("Server error executing transaction.");
     }
   }
 });

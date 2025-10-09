@@ -1,3 +1,5 @@
 flask
-requests
-sqlite3
+yfinance
+pytz
+datetime
+python-dotenv

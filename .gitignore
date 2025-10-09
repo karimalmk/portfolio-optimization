@@ -1,0 +1,50 @@
+# ==========================================
+# Python / Flask cache + temp files
+# ==========================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+*.eggs/
+*.so
+
+# SQLite DBs (if local-only)
+*.db
+instance/
+*.sqlite3
+
+# Environment / virtualenv
+.env
+.venv/
+env/
+venv/
+
+# Flask / runtime cache
+cache/
+tmp/
+instance/cache/
+*.log
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Node / Front-end (if any)
+node_modules/
+npm-debug.log*
+.cache/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Bytecode and build dirs
+build/
+dist/

@@ -4,7 +4,7 @@
 
 
 ## Current problems:
-- Add date and time of the quote (transaction.py, transactions.js)
+- None for now!
 
 ## Learning opportunities:
 - Review how switches work in js

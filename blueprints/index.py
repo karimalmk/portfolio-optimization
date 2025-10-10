@@ -38,10 +38,17 @@ def create_strategy():
         db.commit()
     except IntegrityError:
         abort(400, description="Strategy name must be unique.")
+    try:
+        row = db.execute(
+            "SELECT id FROM strategy WHERE name = ?", (name,)
+        ).fetchone()
+        if not row:
+            abort(500, description="Failed to retrieve newly created strategy.")
+        id = row["id"]
     finally:
         close_db()
 
-    return jsonify({"status": "success", "name": name, "cash": cash}), 201
+    return jsonify({"status": "success", "id": id, "name": name, "cash": cash}), 201
 
 
 # =====================================================

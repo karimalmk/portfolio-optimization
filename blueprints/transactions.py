@@ -155,11 +155,13 @@ def get_quote():
 
     CACHE = load_cache()
     quote = lookup(ticker, CACHE)
-    if not quote or "price" not in quote:
+    if not quote or "price" not in quote or "time" not in quote or "date" not in quote or quote["price"] is None:
         abort(502, description=f"Failed to fetch quote for {ticker}.")
 
     price = round(float(quote["price"]), 2)
     total = round(price * shares, 2)
+    time = quote["time"]
+    date = quote["date"]
 
     return jsonify(
         {
@@ -168,6 +170,8 @@ def get_quote():
             "shares": shares,
             "price": price,
             "total": total,
+            "time": time,
+            "date": date,
         }
     ), 200
 

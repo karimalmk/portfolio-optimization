@@ -32,11 +32,21 @@ if (form) {
       });
       if (!response.ok) throw new Error("Server error creating strategy.");
 
+      // Reload the strategies list
+      await display_strategies();
+
+      // Select the newly created strategy and load its portfolio
       const data = await response.json();
       if (data.status === "success") {
-        await append_strategy(data);
-        alert(`Strategy "${data.name}" created with initial cash ${data.cash}`);
-        this.reset();
+        const strategy_selection = document.getElementById("select-strategy");
+        if (strategy_selection) {
+          strategy_selection.value = data.id;
+          await load_portfolio(data.id);
+          alert(
+            `Strategy "${data.name}" created with initial cash ${data.cash}!`
+          );
+          this.reset();
+        }
       } else {
         alert(data.message || "Failed to create strategy.");
       }
@@ -45,29 +55,6 @@ if (form) {
       alert("An unexpected error occurred while creating the strategy.");
     }
   });
-}
-
-// ======================================================
-// Append new strategy to dropdown
-// ======================================================
-async function append_strategy(new_strategy) {
-  let strategy_selection = document.getElementById("select-strategy");
-
-  // First-time case — build the section
-  if (!strategy_selection) {
-    await display_strategies();
-    strategy_selection = document.getElementById("select-strategy");
-  }
-
-  if (!strategy_selection) return console.warn("Strategy select not found.");
-
-  const option = document.createElement("option");
-  option.value = new_strategy.id;
-  option.textContent = new_strategy.name;
-  strategy_selection.appendChild(option);
-  strategy_selection.value = new_strategy.id;
-
-  await load_portfolio(new_strategy.id);
 }
 
 // ======================================================
@@ -107,6 +94,7 @@ async function display_strategies() {
   const placeholder = document.getElementById("content-placeholder");
   if (!placeholder) return;
 
+  // Remove strategies drop-down if no strategies exist
   const exists = await check_strategies_exists();
   if (!exists) return;
 
@@ -218,7 +206,6 @@ document.addEventListener("click", async (event) => {
 
       const name_cell = document.getElementById(`name-${id}`);
       if (name_cell) name_cell.textContent = new_name;
-      await load_strategies_dropdown();
     } catch (err) {
       console.error("Rename failed:", err);
       alert("Rename failed.");
@@ -239,7 +226,7 @@ document.addEventListener("click", async (event) => {
       target.closest("tr")?.remove();
       const still_exists = await check_strategies_exists();
       if (!still_exists) document.getElementById("strategy-content")?.remove();
-      else await load_strategies_dropdown();
+      else await display_strategies();
     } catch (err) {
       console.error("Delete failed:", err);
       alert("Failed to delete strategy.");
@@ -252,7 +239,7 @@ document.addEventListener("click", async (event) => {
     if (container) container.innerHTML = "";
     const still_exists = await check_strategies_exists();
     if (!still_exists) document.getElementById("strategy-content")?.remove();
-    else await load_strategies_dropdown();
+    await display_strategies();
   }
 });
 
@@ -276,14 +263,14 @@ async function load_portfolio(strategy_id) {
     const portfolio = data.portfolio;
 
     if (overview) {
-      const t = document.createElement("table");
-      t.innerHTML = `
+      const table = document.createElement("table");
+      table.innerHTML = `
         <tr><th>Starting Cash</th><td>${overview.starting_cash}</td></tr>
         <tr><th>Current Cash</th><td>${overview.current_cash}</td></tr>
         <tr><th>Total Value</th><td>${overview.total_value}</td></tr>
         <tr><th>Overall Return</th><td>${overview.overall_return}%</td></tr>
       `;
-      div.appendChild(t);
+      div.appendChild(table);
     }
 
     if (Array.isArray(portfolio) && portfolio.length > 0) {

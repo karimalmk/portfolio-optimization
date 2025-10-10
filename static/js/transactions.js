@@ -81,7 +81,8 @@ document.addEventListener("click", async (event) => {
   if (event.target.id === "confirm-deposit") {
     const amount = document.getElementById("deposit-amount")?.valueAsNumber;
     if (!selection_status) return alert("Please select a strategy first.");
-    if (!Number.isFinite(amount) || amount <= 0) return alert("Enter a valid amount.");
+    if (!Number.isFinite(amount) || amount <= 0)
+      return alert("Enter a valid amount.");
 
     try {
       const response = await fetch("/transactions/api/deposit", {
@@ -107,7 +108,8 @@ document.addEventListener("click", async (event) => {
   if (event.target.id === "confirm-withdraw") {
     const amount = document.getElementById("withdraw-amount")?.valueAsNumber;
     if (!selection_status) return alert("Please select a strategy first.");
-    if (!Number.isFinite(amount) || amount <= 0) return alert("Enter a valid amount.");
+    if (!Number.isFinite(amount) || amount <= 0)
+      return alert("Enter a valid amount.");
 
     try {
       const response = await fetch("/transactions/api/withdraw", {
@@ -131,12 +133,16 @@ document.addEventListener("click", async (event) => {
 
   // ----- Quote handler -----
   if (event.target.id === "get-quote") {
-    const ticker = document.getElementById("ticker")?.value?.trim().toUpperCase();
+    const ticker = document
+      .getElementById("ticker")
+      ?.value?.trim()
+      .toUpperCase();
     const shares = document.getElementById("shares")?.valueAsNumber;
 
     if (!selection_status) return alert("Please select a strategy first.");
     if (!ticker) return alert("Enter a valid ticker.");
-    if (!Number.isFinite(shares) || shares <= 0) return alert("Enter a valid number of shares.");
+    if (!Number.isFinite(shares) || shares <= 0)
+      return alert("Enter a valid number of shares.");
 
     try {
       const response = await fetch("/transactions/api/quote", {
@@ -147,7 +153,8 @@ document.addEventListener("click", async (event) => {
 
       if (!response.ok) throw new Error("Quote fetch failed.");
       const data = await response.json();
-      if (data.status !== "success") throw new Error(data.message || "Invalid server response.");
+      if (data.status !== "success")
+        throw new Error(data.message || "Invalid server response.");
 
       const quote_placeholder = document.getElementById("quote-result");
       quote_placeholder.innerHTML = `
@@ -157,6 +164,7 @@ document.addEventListener("click", async (event) => {
           <tr><td>Price per Share:</td><td>$${data.price ?? 0}</td></tr>
           <tr><td>Total Cost:</td><td>$${data.total ?? 0}</td></tr>
         </table>
+        <p> Quote Time: ${data.time ?? ""} | Date: ${data.date ?? ""} </p>
         <button id="confirm-transaction" type="button"
                 data-ticker="${data.ticker}"
                 data-shares="${data.shares}"
@@ -177,7 +185,8 @@ document.addEventListener("click", async (event) => {
     const price = Number(event.target.dataset.price);
 
     if (!selection_status) return alert("Please select a strategy first.");
-    if (!ticker || !shares || !price) return alert("Incomplete transaction data.");
+    if (!ticker || !shares || !price)
+      return alert("Incomplete transaction data.");
 
     const endpoint = document.getElementById("buy-form") ? "buy" : "sell";
 

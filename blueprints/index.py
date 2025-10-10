@@ -3,7 +3,7 @@ from flask import request, abort, jsonify
 
 # Custom modules
 from helpers.setup import get_db, close_db, create_blueprint, register_error_handlers
-from helpers.api import load_cache, lookup
+from helpers.api import lookup
 
 bp = create_blueprint("index")
 
@@ -141,8 +141,7 @@ def get_portfolio_metrics(db, id):
         if shares <= 0:
             continue  # ignore invalid or stale entries
 
-        CACHE = load_cache()
-        quote = lookup(ticker, CACHE)
+        quote = lookup(ticker)
         if not quote or "price" not in quote:
             continue  # skip unavailable tickers instead of aborting entire portfolio
 

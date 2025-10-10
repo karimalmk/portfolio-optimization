@@ -36,13 +36,3 @@ def register_error_handlers(app):
 # ============================
 def create_blueprint(name):
     return Blueprint(name, __name__)
-
-# ============================
-# Currency Formatters
-# ============================
-def format_currency(value, symbol="$"):
-    return f"{symbol}{value:,.2f}"
-
-usd = lambda v: format_currency(v, "$")
-gbp = lambda v: format_currency(v, "£")
-eur = lambda v: format_currency(v, "€")

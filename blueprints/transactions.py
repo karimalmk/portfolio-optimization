@@ -3,7 +3,7 @@ from flask import request, session, abort, jsonify
 
 # Custom modules
 from helpers.setup import get_db, close_db, create_blueprint, register_error_handlers
-from helpers.api import lookup, load_cache
+from helpers.api import lookup
 
 bp = create_blueprint("transactions")
 
@@ -153,8 +153,7 @@ def get_quote():
     except (TypeError, ValueError):
         abort(400, description="Invalid number of shares.")
 
-    CACHE = load_cache()
-    quote = lookup(ticker, CACHE)
+    quote = lookup(ticker)
     if not quote or "price" not in quote or "time" not in quote or "date" not in quote or quote["price"] is None:
         abort(502, description=f"Failed to fetch quote for {ticker}.")
 

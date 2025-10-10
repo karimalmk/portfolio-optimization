@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template
-from helpers.setup import register_error_handlers, get_db, usd, gbp, eur
+from helpers.setup import register_error_handlers, get_db, close_db
 
 # Importing blueprints
 from blueprints.transactions import bp as transactions_bp
@@ -21,11 +21,6 @@ def after_request(response):
 # Register error handlers
 register_error_handlers(app)
 
-# Currency filters
-app.jinja_env.filters["usd"] = usd
-app.jinja_env.filters["gbp"] = gbp
-app.jinja_env.filters["eur"] = eur
-
 # Register blueprints
 app.register_blueprint(transactions_bp)
 app.register_blueprint(api_bp)
@@ -36,7 +31,7 @@ def index():
     db = get_db()
     rows = db.execute("SELECT id, name FROM strategy").fetchall()
     strategies = [{"id": row["id"], "name": row["name"]} for row in rows]
-    db.close()
+    close_db()
     return render_template("index.html", strategies=strategies)
 
 # Transactions route
@@ -45,7 +40,7 @@ def transactions():
     db = get_db()
     rows = db.execute("SELECT id, name FROM strategy").fetchall()
     strategies = [{"id": row["id"], "name": row["name"]} for row in rows]
-    db.close()
+    close_db()
     return render_template("transactions.html", strategies=strategies)
 
 # Run the application

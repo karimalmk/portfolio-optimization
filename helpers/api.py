@@ -4,67 +4,67 @@ from pytz import timezone
 
 EXCHANGES = {
     # 🇺🇸 United States
-    "NYSE":   {"currency": "USD", "timezone": "America/New_York"},
-    "NASDAQ": {"currency": "USD", "timezone": "America/New_York"},
-    "AMEX":   {"currency": "USD", "timezone": "America/New_York"},
-    "BATS":   {"currency": "USD", "timezone": "America/New_York"},
+    "NYSE":   {"currency": "USD", "timezone": "America/New_York", "open": "09:30", "close": "16:00"},
+    "NASDAQ": {"currency": "USD", "timezone": "America/New_York", "open": "09:30", "close": "16:00"},
+    "AMEX":   {"currency": "USD", "timezone": "America/New_York", "open": "09:30", "close": "16:00"},
+    "BATS":   {"currency": "USD", "timezone": "America/New_York", "open": "09:30", "close": "16:00"},
 
     # 🇨🇦 Canada
-    "TSX":    {"currency": "CAD", "timezone": "America/Toronto"},
-    "TSXV":   {"currency": "CAD", "timezone": "America/Toronto"},
+    "TSX":    {"currency": "CAD", "timezone": "America/Toronto", "open": "09:30", "close": "16:00"},
+    "TSXV":   {"currency": "CAD", "timezone": "America/Toronto", "open": "09:30", "close": "16:00"},
 
     # 🇬🇧 United Kingdom
-    "LSE":    {"currency": "GBP", "timezone": "Europe/London"},
+    "LSE":    {"currency": "GBP", "timezone": "Europe/London", "open": "08:00", "close": "16:30"},
 
     # 🇪🇺 Europe
-    "FRA":    {"currency": "EUR", "timezone": "Europe/Berlin"},  # Frankfurt
-    "GER":    {"currency": "EUR", "timezone": "Europe/Berlin"},  # alias
-    "ETR":    {"currency": "EUR", "timezone": "Europe/Berlin"},  # Deutsche Börse Xetra
-    "PAR":    {"currency": "EUR", "timezone": "Europe/Paris"},   # Euronext Paris
-    "AMS":    {"currency": "EUR", "timezone": "Europe/Amsterdam"},
-    "BRU":    {"currency": "EUR", "timezone": "Europe/Brussels"},
-    "MIL":    {"currency": "EUR", "timezone": "Europe/Rome"},
-    "VIE":    {"currency": "EUR", "timezone": "Europe/Vienna"},
-    "CPH":    {"currency": "DKK", "timezone": "Europe/Copenhagen"},
-    "STO":    {"currency": "SEK", "timezone": "Europe/Stockholm"},
-    "HEL":    {"currency": "EUR", "timezone": "Europe/Helsinki"},
-    "OSL":    {"currency": "NOK", "timezone": "Europe/Oslo"},
+    "FRA":    {"currency": "EUR", "timezone": "Europe/Berlin", "open": "09:00", "close": "17:30"},  # Frankfurt
+    "GER":    {"currency": "EUR", "timezone": "Europe/Berlin", "open": "09:00", "close": "17:30"},  # alias
+    "ETR":    {"currency": "EUR", "timezone": "Europe/Berlin", "open": "09:00", "close": "17:30"},  # Deutsche Börse Xetra
+    "PAR":    {"currency": "EUR", "timezone": "Europe/Paris", "open": "09:00", "close": "17:30"},   # Euronext Paris
+    "AMS":    {"currency": "EUR", "timezone": "Europe/Amsterdam", "open": "09:00", "close": "17:30"},
+    "BRU":    {"currency": "EUR", "timezone": "Europe/Brussels", "open": "09:00", "close": "17:30"},
+    "MIL":    {"currency": "EUR", "timezone": "Europe/Rome", "open": "09:00", "close": "17:30"},
+    "VIE":    {"currency": "EUR", "timezone": "Europe/Vienna", "open": "09:00", "close": "17:30"},
+    "CPH":    {"currency": "DKK", "timezone": "Europe/Copenhagen", "open": "09:00", "close": "17:00"},
+    "STO":    {"currency": "SEK", "timezone": "Europe/Stockholm", "open": "09:00", "close": "17:30"},
+    "HEL":    {"currency": "EUR", "timezone": "Europe/Helsinki", "open": "10:00", "close": "18:30"},
+    "OSL":    {"currency": "NOK", "timezone": "Europe/Oslo", "open": "09:00", "close": "16:30"},
 
     # 🇨🇭 Switzerland
-    "SIX":    {"currency": "CHF", "timezone": "Europe/Zurich"},
+    "SIX":    {"currency": "CHF", "timezone": "Europe/Zurich", "open": "09:00", "close": "17:30"},
 
     # 🇯🇵 Japan
-    "TSE":    {"currency": "JPY", "timezone": "Asia/Tokyo"},
-    "JPX":    {"currency": "JPY", "timezone": "Asia/Tokyo"},
+    "TSE":    {"currency": "JPY", "timezone": "Asia/Tokyo", "open": "09:00", "close": "15:00"},
+    "JPX":    {"currency": "JPY", "timezone": "Asia/Tokyo", "open": "09:00", "close": "15:00"},
 
     # 🇭🇰 Hong Kong
-    "HKEX":   {"currency": "HKD", "timezone": "Asia/Hong_Kong"},
+    "HKEX":   {"currency": "HKD", "timezone": "Asia/Hong_Kong", "open": "09:30", "close": "16:00"},
 
     # 🇨🇳 China
-    "SSE":    {"currency": "CNY", "timezone": "Asia/Shanghai"},
-    "SZSE":   {"currency": "CNY", "timezone": "Asia/Shanghai"},
+    "SSE":    {"currency": "CNY", "timezone": "Asia/Shanghai", "open": "09:30", "close": "15:00"},
+    "SZSE":   {"currency": "CNY", "timezone": "Asia/Shanghai", "open": "09:30", "close": "15:00"},
 
     # 🇮🇳 India
-    "NSE":    {"currency": "INR", "timezone": "Asia/Kolkata"},
-    "BSE":    {"currency": "INR", "timezone": "Asia/Kolkata"},
+    "NSE":    {"currency": "INR", "timezone": "Asia/Kolkata", "open": "09:15", "close": "15:30"},
+    "BSE":    {"currency": "INR", "timezone": "Asia/Kolkata", "open": "09:15", "close": "15:30"},
 
     # 🇦🇺 Australia
-    "ASX":    {"currency": "AUD", "timezone": "Australia/Sydney"},
+    "ASX":    {"currency": "AUD", "timezone": "Australia/Sydney", "open": "10:00", "close": "16:00"},
 
     # 🇧🇷 Brazil
-    "BVMF":   {"currency": "BRL", "timezone": "America/Sao_Paulo"},
+    "BVMF":   {"currency": "BRL", "timezone": "America/Sao_Paulo", "open": "10:00", "close": "17:00"},
 
     # 🇲🇽 Mexico
-    "MX":     {"currency": "MXN", "timezone": "America/Mexico_City"},
+    "MX":     {"currency": "MXN", "timezone": "America/Mexico_City", "open": "08:30", "close": "15:00"},
 
     # 🇸🇬 Singapore
-    "SGX":    {"currency": "SGD", "timezone": "Asia/Singapore"},
+    "SGX":    {"currency": "SGD", "timezone": "Asia/Singapore", "open": "09:00", "close": "17:00"},
 
     # 🇰🇷 South Korea
-    "KRX":    {"currency": "KRW", "timezone": "Asia/Seoul"},
+    "KRX":    {"currency": "KRW", "timezone": "Asia/Seoul", "open": "09:00", "close": "15:30"},
 
     # 🇿🇦 South Africa
-    "JSE":    {"currency": "ZAR", "timezone": "Africa/Johannesburg"},
+    "JSE":    {"currency": "ZAR", "timezone": "Africa/Johannesburg", "open": "09:00", "close": "17:00"},
 }
 
 
@@ -74,7 +74,7 @@ EXCHANGE_ALIASES = {
     "NGM": "NASDAQ",
     "NAS": "NASDAQ",
     "NYQ": "NYSE",
-    "PCX": "NYSE",   # NYSE Arca
+    "PCX": "NYSE",
     "ASE": "AMEX",
     "BATS": "BATS",
 
@@ -82,7 +82,7 @@ EXCHANGE_ALIASES = {
     "TOR": "TSX",
     "VAN": "TSXV",
     "TSX": "TSX",
-    "CNQ": "TSX",  # Canadian Securities Exchange
+    "CNQ": "TSX",
 
     # UK & Europe
     "LSE": "LSE",
@@ -131,7 +131,6 @@ EXCHANGE_ALIASES = {
 
 
 CACHE = {}  # {"ticker": {"price": float, "time": datetime}}
-CACHE_UPDATE = timedelta(hours=1)
 
 # =====================================================
 # Exchange Rate
@@ -145,11 +144,12 @@ def get_exchange_rate(exchange: str):
     if currency == "USD":
         return 1.0
 
-    pair = f"{currency}USD=X"
+    pair = f"USD{currency}=X"
     try:
         data = yf.Ticker(pair).info
         rate = data.get("regularMarketPrice") or data.get("previousClose")
-        return float(rate) if rate else None
+        rate = float(rate) if rate else None
+        return 1/rate if rate else None
     except Exception:
         return None
 
@@ -157,12 +157,15 @@ def get_exchange_rate(exchange: str):
 # =====================================================
 # Market Status
 # =====================================================
-def check_market_status(tz_name: str):
+def check_market_status(exchange: str):
+    tz_name = EXCHANGES[exchange]["timezone"]
     tz = timezone(tz_name)
     now = datetime.now(tz)
-    open_t = datetime.strptime("09:30:00", "%H:%M:%S").time()
-    close_t = datetime.strptime("16:00:00", "%H:%M:%S").time()
-    weekday = now.weekday() < 5
+    country_open = EXCHANGES[exchange]["open"]
+    country_close = EXCHANGES[exchange]["close"]
+    open_t = datetime.strptime(country_open, "%H:%M").time()
+    close_t = datetime.strptime(country_close, "%H:%M").time()
+    weekday = now.weekday() < 5 # Applies for most exchanges; holidays not considered
 
     return {
         "market_open": (open_t <= now.time() <= close_t) and weekday,
@@ -187,16 +190,14 @@ def lookup(ticker: str):
         if exchange not in EXCHANGES:
             return {"ticker": ticker, "price": None, "error": f"Unknown exchange '{exchange_code}'"}
 
-        tz_name = EXCHANGES[exchange]["timezone"]
-        status = check_market_status(tz_name)
+        status = check_market_status(exchange)
         rate = get_exchange_rate(exchange)
 
         if status["market_open"]:
-            CACHE.pop(ticker, None)
             price = info.get("regularMarketPrice")
         else:
             # Cached price
-            if ticker in CACHE and datetime.now() - CACHE[ticker]["time"] < CACHE_UPDATE:
+            if ticker in CACHE:
                 price = CACHE[ticker]["price"]
             else:
                 price = info.get("previousClose")

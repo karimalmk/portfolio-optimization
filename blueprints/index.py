@@ -102,6 +102,7 @@ def display_portfolio(id):
     overall_return = (
         (total_value - starting_cash) / starting_cash * 100 if starting_cash else 0
     )
+    cash_contribution = current_cash / total_value * 100 if total_value else 0
 
     # Update cached total value
     db.execute("UPDATE strategy SET total_value = ? WHERE id = ?", (total_value, id))
@@ -114,6 +115,7 @@ def display_portfolio(id):
             "overview": {
                 "starting_cash": round(starting_cash, 2),
                 "current_cash": round(current_cash, 2),
+                "cash_contribution": round(cash_contribution, 2),
                 "total_value": round(total_value, 2),
                 "overall_return": round(overall_return, 2),
             },
@@ -180,6 +182,10 @@ def get_portfolio_metrics(db, id):
                 "stock_return": stock_return,
             }
         )
+    
+    for stock in stocks:
+        portfolio_contribution = stock["share_value"] / equity_value * 100 if equity_value else 0
+        portfolio.append(round(portfolio_contribution, 2))
 
     return {"portfolio": portfolio, "equity_value": round(equity_value, 2)}
 

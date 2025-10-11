@@ -267,8 +267,10 @@ async function load_portfolio(strategy_id) {
       table.innerHTML = `
         <tr><th>Starting Cash</th><td>${overview.starting_cash}</td></tr>
         <tr><th>Current Cash</th><td>${overview.current_cash}</td></tr>
+        <tr><th>Cash Contribution</th><td>${overview.cash_contribution}</td></tr>
         <tr><th>Total Value</th><td>${overview.total_value}</td></tr>
-        <tr><th>Overall Return</th><td>${overview.overall_return}%</td></tr>
+        <tr><th>Overall Return</th><td>${overview.overall_return}</td></tr>
+
       `;
       div.appendChild(table);
     }
@@ -279,7 +281,7 @@ async function load_portfolio(strategy_id) {
         <thead>
           <tr>
             <th>Ticker</th><th>Shares</th><th>Price</th><th>Value</th>
-            <th>Weighted Price</th><th>Return</th>
+            <th>Weighted Price</th><th>% of Portfolio</th><th>Return</th>
           </tr>
         </thead>
         <tbody>
@@ -292,6 +294,7 @@ async function load_portfolio(strategy_id) {
                 <td>${stock.price}</td>
                 <td>${stock.share_value}</td>
                 <td>${stock.weighted_price}</td>
+                <td>${stock.portfolio_contribution}%</td>
                 <td>${stock.stock_return}%</td>
               </tr>`
             )

@@ -149,7 +149,7 @@ def get_exchange_rate(exchange: str):
         data = yf.Ticker(pair).info
         rate = data.get("regularMarketPrice") or data.get("previousClose")
         rate = float(rate) if rate else None
-        return 1/rate if rate else None
+        return rate if rate else None
     except Exception:
         return None
 
@@ -165,10 +165,10 @@ def check_market_status(exchange: str):
     country_close = EXCHANGES[exchange]["close"]
     open_t = datetime.strptime(country_open, "%H:%M").time()
     close_t = datetime.strptime(country_close, "%H:%M").time()
-    weekday = now.weekday() < 5 # Applies for most exchanges; holidays not considered
+
 
     return {
-        "market_open": (open_t <= now.time() <= close_t) and weekday,
+        "market_open": (open_t <= now.time() <= close_t),
         "time_now": now,
         "date_now": now.date(),
     }
@@ -207,7 +207,7 @@ def lookup(ticker: str):
         if not price:
             return {"ticker": ticker, "price": None, "error": "Price not found"}
 
-        price = round(float(price) * (rate or 1.0), 2)
+        price = round(float(price) / (rate or 1.0), 2)
         return {
             "ticker": ticker,
             "price": price,

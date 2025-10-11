@@ -1,3 +1,5 @@
+import { formatUSD, formatComma, formatPercent } from "./helpers/formatters.js";
+
 // ======================================================
 // Meta initialization
 // ======================================================
@@ -43,7 +45,7 @@ if (form) {
           strategy_selection.value = data.id;
           await load_portfolio(data.id);
           alert(
-            `Strategy "${data.name}" created with initial cash ${data.cash}!`
+            `Strategy "${data.name}" created with initial cash ${formatUSD(data.cash)}!`
           );
           this.reset();
         }
@@ -252,6 +254,7 @@ async function load_portfolio(strategy_id) {
   try {
     const response = await fetch(`/api/portfolio/${strategy_id}`);
     if (!response.ok) throw new Error();
+
     const data = await response.json();
 
     const div = document.getElementById("portfolio");
@@ -265,11 +268,11 @@ async function load_portfolio(strategy_id) {
     if (overview) {
       const table = document.createElement("table");
       table.innerHTML = `
-        <tr><th>Starting Cash</th><td>${overview.starting_cash}</td></tr>
-        <tr><th>Current Cash</th><td>${overview.current_cash}</td></tr>
-        <tr><th>Cash Contribution</th><td>${overview.cash_contribution}</td></tr>
-        <tr><th>Total Value</th><td>${overview.total_value}</td></tr>
-        <tr><th>Overall Return</th><td>${overview.overall_return}</td></tr>
+        <tr><th>Starting Cash</th><td>${formatUSD(overview.starting_cash)}</td></tr>
+        <tr><th>Current Cash</th><td>${formatUSD(overview.current_cash)}</td></tr>
+        <tr><th>Equity Value</th><td>${formatUSD(overview.equity_value)}</td></tr>
+        <tr><th>Total Value</th><td>${formatUSD(overview.total_value)}</td></tr>
+        <tr><th>Overall Return</th><td>${formatPercent(overview.overall_return)}</td></tr>
 
       `;
       div.appendChild(table);
@@ -281,7 +284,7 @@ async function load_portfolio(strategy_id) {
         <thead>
           <tr>
             <th>Ticker</th><th>Shares</th><th>Price</th><th>Value</th>
-            <th>Weighted Price</th><th>% of Portfolio</th><th>Return</th>
+            <th>Weighted Price</th><th>%</th><th>Return</th>
           </tr>
         </thead>
         <tbody>
@@ -291,11 +294,11 @@ async function load_portfolio(strategy_id) {
               <tr>
                 <td>${stock.ticker}</td>
                 <td>${stock.shares}</td>
-                <td>${stock.price}</td>
-                <td>${stock.share_value}</td>
-                <td>${stock.weighted_price}</td>
-                <td>${stock.portfolio_contribution}%</td>
-                <td>${stock.stock_return}%</td>
+                <td>${formatUSD(stock.price)}</td>
+                <td>${formatUSD(stock.share_value)}</td>
+                <td>${formatUSD(stock.weighted_price)}</td>
+                <td>${formatPercent(stock.portfolio_contribution)}</td>
+                <td>${formatPercent(stock.stock_return)}</td>
               </tr>`
             )
             .join("")}

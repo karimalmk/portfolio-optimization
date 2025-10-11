@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import request, session, abort, jsonify
 
 # Custom modules
-from helpers.setup import get_db, close_db, create_blueprint, register_error_handlers
+from helpers.setup import get_db, close_db, create_blueprint
 from helpers.api import lookup
 
 bp = create_blueprint("transactions")
@@ -79,7 +79,7 @@ def deposit():
         )
         db.commit()
         session["current_cash"] = new_cash
-        return jsonify({"status": "success", "new_cash": round(new_cash, 2)}), 200
+        return jsonify({"status": "success", "new_cash": new_cash}), 200
     finally:
         close_db()
 
@@ -128,7 +128,7 @@ def withdraw():
         )
         db.commit()
         session["current_cash"] = new_cash
-        return jsonify({"status": "success", "new_cash": round(new_cash, 2)}), 200
+        return jsonify({"status": "success", "new_cash": new_cash}), 200
     finally:
         close_db()
 
@@ -157,8 +157,8 @@ def get_quote():
     if not quote or "price" not in quote or "time" not in quote or "date" not in quote or quote["price"] is None:
         abort(502, description=f"Failed to fetch quote for {ticker}.")
 
-    price = round(float(quote["price"]), 2)
-    total = round(price * shares, 2)
+    price = float(quote["price"])
+    total = price * shares
     time = quote["time"]
     date = quote["date"]
 
@@ -243,7 +243,7 @@ def buy():
 
         session["current_cash"] = new_cash
         return jsonify(
-            {"status": "success", "ticker": ticker, "shares": shares, "cost": round(cost, 2)}
+            {"status": "success", "ticker": ticker, "shares": shares, "cost": cost}
         ), 200
     finally:
         close_db()
@@ -323,7 +323,7 @@ def sell():
                 "status": "success",
                 "ticker": ticker,
                 "shares": shares,
-                "revenue": round(revenue, 2),
+                "revenue": revenue,
             }
         ), 200
     finally:

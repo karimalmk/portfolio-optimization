@@ -2,7 +2,7 @@ from sqlite3 import IntegrityError
 from flask import request, abort, jsonify
 
 # Custom modules
-from helpers.setup import get_db, close_db, create_blueprint, register_error_handlers
+from helpers.setup import get_db, close_db, create_blueprint
 from helpers.api import lookup
 
 bp = create_blueprint("index")
@@ -65,8 +65,8 @@ def get_strategies():
             {
                 "id": row["id"],
                 "name": row["name"],
-                "cash": round(row["current_cash"], 2),
-                "total_value": round(row["total_value"], 2),
+                "cash": row["current_cash"],
+                "total_value": row["total_value"],
             }
             for row in rows
         ]
@@ -100,9 +100,10 @@ def display_portfolio(id):
 
     total_value = equity_value + current_cash
     overall_return = (
-        (total_value - starting_cash) / starting_cash * 100 if starting_cash else 0
+        (total_value - starting_cash) / starting_cash if starting_cash else 0
     )
-    cash_contribution = current_cash / total_value * 100 if total_value else 0
+    cash_contribution = current_cash / total_value if total_value else 0
+    equity_contribution = equity_value / total_value if total_value else 0
 
     # Update cached total value
     db.execute("UPDATE strategy SET total_value = ? WHERE id = ?", (total_value, id))
@@ -113,11 +114,13 @@ def display_portfolio(id):
         {
             "portfolio": portfolio,
             "overview": {
-                "starting_cash": round(starting_cash, 2),
-                "current_cash": round(current_cash, 2),
-                "cash_contribution": round(cash_contribution, 2),
-                "total_value": round(total_value, 2),
-                "overall_return": round(overall_return, 2),
+                "starting_cash": starting_cash,
+                "current_cash": current_cash,
+                "cash_contribution": cash_contribution,
+                "equity_value": equity_value,
+                "equity_contribution": equity_contribution,
+                "total_value": total_value,
+                "overall_return": overall_return,
             },
         }
     )
@@ -148,7 +151,7 @@ def get_portfolio_metrics(db, id):
             continue  # skip unavailable tickers instead of aborting entire portfolio
 
         price = float(quote["price"])
-        share_value = round(shares * price, 2)
+        share_value = shares * price
         equity_value += share_value
 
         # Weighted purchase price
@@ -164,30 +167,29 @@ def get_portfolio_metrics(db, id):
         total_buys = sum(b["price"] * b["shares"] for b in buys)
         total_sells = sum(s["price"] * s["shares"] for s in sells)
         net_spent = total_buys - total_sells
-        weighted_price = round(net_spent / shares, 2) if shares else 0
+        weighted_price = net_spent / shares if shares else 0
 
         stock_return = (
-            round(((price - weighted_price) / weighted_price * 100), 2)
+            ((price - weighted_price) / weighted_price)
             if weighted_price
             else 0
         )
 
-        portfolio.append(
-            {
-                "ticker": ticker,
-                "shares": shares,
-                "price": price,
-                "share_value": share_value,
-                "weighted_price": weighted_price,
-                "stock_return": stock_return,
-            }
-        )
+        portfolio.append({
+            "ticker": ticker,
+            "shares": shares,
+            "price": price,
+            "share_value": share_value,
+            "weighted_price": weighted_price,
+            "portfolio_contribution": 0,  # to be calculated later
+            "stock_return": stock_return,
+            })
     
-    for stock in stocks:
-        portfolio_contribution = stock["share_value"] / equity_value * 100 if equity_value else 0
-        portfolio.append(round(portfolio_contribution, 2))
+    for stock in portfolio:
+        portfolio_contribution = stock["share_value"] / equity_value if equity_value else 0
+        stock["portfolio_contribution"] = portfolio_contribution
 
-    return {"portfolio": portfolio, "equity_value": round(equity_value, 2)}
+    return {"portfolio": portfolio, "equity_value": equity_value}
 
 
 # =====================================================

@@ -1,12 +1,12 @@
 ## Future Features
 - Add backtesting HTML page for historical strategy evaluation and performance comparison.  
 - (Planned) Include time-span selectors for return analysis and benchmark comparison.  
-- Add auto-refresh option for live portfolio updates during market hours.  
+- Add weekend and holiday functionality to price caching system in `api.py`.
 
 ---
 
 ## Current Status
-- No known issues! Everything is running smoothly for now.
+- No known issues. Everything is running smoothly for now.
 
 ---
 

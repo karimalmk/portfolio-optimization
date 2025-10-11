@@ -1,3 +1,5 @@
+import { formatUSD } from "./helpers/formatters.js";
+
 // ==================================================
 // Strategy selection handler
 // ==================================================
@@ -94,7 +96,7 @@ document.addEventListener("click", async (event) => {
       const data = await response.json();
       if (data.status === "success") {
         console.log(data);
-        alert(`Deposit successful! New cash balance: ${data.new_cash}`);
+        alert(`Deposit successful! New cash balance: ${formatUSD(data.new_cash)}`);
       } else {
         alert(data.message || "Deposit failed.");
       }
@@ -121,7 +123,7 @@ document.addEventListener("click", async (event) => {
       const data = await response.json();
       if (data.status === "success") {
         console.log(data);
-        alert(`Withdrawal successful! New cash balance: ${data.new_cash}`);
+        alert(`Withdrawal successful! New cash balance: ${formatUSD(data.new_cash)}`);
       } else {
         alert(data.message || "Withdrawal failed.");
       }
@@ -160,16 +162,16 @@ document.addEventListener("click", async (event) => {
       quote_placeholder.innerHTML = `
         <table>
           <tr><td>Ticker:</td><td>${data.ticker ?? ""}</td></tr>
-          <tr><td>Shares:</td><td>${data.shares ?? 0}</td></tr>
-          <tr><td>Price per Share:</td><td>$${data.price ?? 0}</td></tr>
-          <tr><td>Total Cost:</td><td>$${data.total ?? 0}</td></tr>
+          <tr><td>Shares:</td><td>${data.shares}</td></tr>
+          <tr><td>Price per Share:</td><td>${formatUSD(data.price)}</td></tr>
+          <tr><td>Total Cost:</td><td>${formatUSD(data.total)}</td></tr>
         </table>
         <p> Quote Time: ${data.time ?? ""} | Date: ${data.date ?? ""} </p>
         <button id="confirm-transaction" type="button"
                 data-ticker="${data.ticker}"
                 data-shares="${data.shares}"
                 data-price="${data.price}">
-          Confirm
+          Confirm ${data.ticker} — ${data.shares} @ ${formatUSD(data.price)}
         </button>
       `;
     } catch (err) {
